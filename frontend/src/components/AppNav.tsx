@@ -1,0 +1,102 @@
+"use client";
+
+import {
+  AlertTriangle,
+  BarChart3,
+  ClipboardList,
+  History,
+  LayoutDashboard,
+  Map,
+  Package,
+  Route,
+  Settings,
+  ShieldCheck,
+  Truck,
+  Users,
+  UserRound,
+} from "lucide-react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+
+import { cn } from "@/lib/cn";
+
+export type NavItem = {
+  href: string;
+  label: string;
+  icon: string;
+  exact?: boolean;
+};
+
+const ICONS: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>> = {
+  dashboard: LayoutDashboard,
+  requests: ClipboardList,
+  history: History,
+  settings: Settings,
+  batches: Package,
+  route: Route,
+  profile: UserRound,
+  customers: Users,
+  partners: ShieldCheck,
+  issues: AlertTriangle,
+  analytics: BarChart3,
+  monitor: Map,
+  truck: Truck,
+};
+
+function useIsActive() {
+  const pathname = usePathname() ?? "";
+  return (item: NavItem) =>
+    item.exact ? pathname === item.href : pathname === item.href || pathname.startsWith(`${item.href}/`);
+}
+
+export function SidebarNav({ items }: { items: NavItem[] }) {
+  const isActive = useIsActive();
+  return (
+    <nav aria-label="Primary" className="mt-6 space-y-1 px-3">
+      {items.map((item) => {
+        const Icon = ICONS[item.icon] ?? LayoutDashboard;
+        return (
+          <Link
+            key={item.href}
+            href={item.href}
+            aria-current={isActive(item) ? "page" : undefined}
+            className={cn("nav-item", isActive(item) && "nav-item-active")}
+          >
+            <Icon size={17} strokeWidth={2} aria-hidden />
+            <span>{item.label}</span>
+          </Link>
+        );
+      })}
+    </nav>
+  );
+}
+
+export function MobileNav({ items }: { items: NavItem[] }) {
+  const isActive = useIsActive();
+  return (
+    <nav
+      aria-label="Primary mobile"
+      className="fixed inset-x-0 bottom-0 z-40 border-t bg-surface px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
+    >
+      <div className="flex items-stretch justify-around">
+        {items.slice(0, 5).map((item) => {
+          const Icon = ICONS[item.icon] ?? LayoutDashboard;
+          return (
+            <Link
+              key={item.href}
+              href={item.href}
+              aria-current={isActive(item) ? "page" : undefined}
+              className={cn(
+                "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 px-1 py-2 text-[10px] font-medium",
+                isActive(item) ? "text-accent" : "text-muted",
+              )}
+            >
+              <Icon size={19} strokeWidth={2} aria-hidden />
+              <span className="line-clamp-1 text-center">{item.label}</span>
+            </Link>
+          );
+        })}
+      </div>
+    </nav>
+  );
+}

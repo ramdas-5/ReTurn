@@ -1,0 +1,56 @@
+# ReTurn — local/demo stack. PostgreSQL is the mandatory persistent database.
+# Start with: docker compose up --build
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: return-db
+    environment:
+      POSTGRES_USER: return
+      POSTGRES_PASSWORD: return_dev_pw
+      POSTGRES_DB: return_dev
+    ports:
+      - "5433:5432"
+    volumes:
+      - return_pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U return -d return_dev"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  backend:
+    build: ./backend
+    container_name: return-api
+    environment:
+      DATABASE_URL: postgresql+psycopg://return:return_dev_pw@db:5432/return_dev
+      FLASK_SECRET_KEY: ${FLASK_SECRET_KEY:-dev-only-change-me-4f8c1e6a9b2d4f70}
+      SESSION_COOKIE_SECURE: "false"
+      CORS_ALLOWED_ORIGINS: http://localhost:3000,http://127.0.0.1:3000
+      ROUTING_PROVIDER: ${ROUTING_PROVIDER:-auto}
+      OSRM_BASE_URL: ${OSRM_BASE_URL:-https://router.project-osrm.org}
+      ROUTING_TIMEOUT_SECONDS: ${ROUTING_TIMEOUT_SECONDS:-3}
+      SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+    depends_on:
+      db:
+        condition: service_healthy
+    ports:
+      - "5000:5000"
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        # Baked into the Next rewrite; the browser still calls same-origin /api/v1.
+        FLASK_API_URL: http://backend:5000
+    container_name: return-web
+    environment:
+      API_INTERNAL_URL: http://backend:5000
+      FLASK_API_URL: http://backend:5000
+      NODE_ENV: production
+    depends_on:
+      - backend
+    ports:
+      - "3000:3000"
+
+volumes:
+  return_pgdata:
