@@ -16,6 +16,12 @@ def create_app(config_object: type = Config, **overrides) -> Flask:
     app.config.from_object(config_object)
     app.config.update(overrides)
 
+    if app.config.get("TRUST_PROXY_HEADERS"):
+        from werkzeug.middleware.proxy_fix import ProxyFix
+
+        # One trusted hop: the platform reverse proxy (Render/Vercel).
+        app.wsgi_app = ProxyFix(app.wsgi_app, x_for=1, x_proto=1)
+
     db.init_app(app)
     migrate.init_app(app, db)
 

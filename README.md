@@ -153,7 +153,7 @@ docker compose up --build
 - API health: http://localhost:5000/api/v1/health
 - PostgreSQL: `localhost:5433` (`return` / `return_dev_pw` / `return_dev`)
 
-The backend container runs `flask db upgrade` on start. With `SEED_DEMO_DATA=true` (compose default) it also reseeds the fictional demo scenario — **this is destructive** and intended for demo environments only.
+The backend container runs `flask db upgrade` on start. With `SEED_DEMO_DATA=true` (compose default) it also seeds the fictional demo scenario **only when the database has no users**. Set `SEED_DEMO_DATA_RESET=true` to force a destructive wipe + re-seed — intended for demo environments only.
 
 ### Option B — Local processes
 
@@ -200,6 +200,20 @@ Copy `.env.example` to `.env` (loaded by Flask). Copy `frontend/.env.example` to
 
 Never prefix the Flask URL, database URL or Flask secret with `NEXT_PUBLIC_`; those remain server-only.
 
+### Deployment (production)
+
+The repository is deploy-ready for **Vercel (frontend) + Render (Flask Docker) + Neon (PostgreSQL)**. Full step-by-step instructions, environment variables, manual tasks, verification and troubleshooting are in **[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)**.
+
+Short version:
+
+1. Create a Neon PostgreSQL database and copy the **direct** connection string.
+2. Render → **New → Blueprint** → select this repo; paste `DATABASE_URL`; note the API URL.
+3. Vercel → import this repo → **Root Directory: `frontend`** → add `FLASK_API_URL` and `API_INTERNAL_URL` (both = the Render API URL) → deploy.
+4. Warm up `https://<api>/api/v1/health`, then sign in with the seeded demo accounts.
+5. Before storing real data: set `SEED_DEMO_DATA=false` and remove the demo accounts.
+
+`render.yaml`, `frontend/vercel.json` and `backend/.dockerignore` are included. The container respects `$PORT`, runs Alembic on boot, and seeds only when the database is empty (`SEED_DEMO_DATA_RESET=true` opts into destructive re-seeding).
+
 ---
 
 ## 6. Commands
@@ -210,6 +224,7 @@ Never prefix the Flask URL, database URL or Flask secret with `NEXT_PUBLIC_`; th
 | Apply migrations | `cd backend && flask --app wsgi db upgrade` |
 | Check migration drift | `cd backend && flask --app wsgi db check` |
 | Seed / reset demo data | `cd backend && python manage.py seed` |
+| Seed only if empty (container) | `cd backend && python manage.py seed-if-empty` |
 | Seed row counts | `cd backend && python manage.py check` |
 | Run API | `cd backend && flask --app wsgi run --port 5000` |
 | Frontend dev | `cd frontend && npm run dev` |

@@ -1,8 +1,9 @@
 """ReTurn development management commands.
 
 Usage:
-    python manage.py seed     # truncate + create the fictional demo scenario
-    python manage.py check    # print schema/row counts without changing data
+    python manage.py seed           # truncate + create the fictional demo scenario
+    python manage.py seed-if-empty  # seed only when no users exist (safe on restart)
+    python manage.py check          # print schema/row counts without changing data
 """
 from __future__ import annotations
 
@@ -34,16 +35,28 @@ def _counts() -> dict:
     return rows
 
 
+def _seed(label: str) -> int:
+    summary = seed_demo_data(reset=True)
+    print(f"{label} ReTurn demo data:")
+    for key, value in summary.items():
+        print(f"  {key}: {value}")
+    print("Counts:", _counts())
+    return 0
+
+
 def main() -> int:
     command = sys.argv[1] if len(sys.argv) > 1 else "seed"
     with app.app_context():
         if command == "seed":
-            summary = seed_demo_data(reset=True)
-            print("Seeded ReTurn demo data:")
-            for key, value in summary.items():
-                print(f"  {key}: {value}")
-            print("Counts:", _counts())
-            return 0
+            return _seed("Seeded")
+        if command == "seed-if-empty":
+            from app.models import User
+
+            if db.session.query(User.id).first() is not None:
+                print("Users already exist; skipping demo seed.")
+                print("Counts:", _counts())
+                return 0
+            return _seed("Seeded")
         if command == "check":
             print("Counts:", _counts())
             return 0

@@ -27,20 +27,37 @@ def _float(name: str, default: float) -> float:
         return default
 
 
-class Config:
-    SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-only-return-session-secret")
-    SQLALCHEMY_DATABASE_URI = os.getenv(
+def _database_url() -> str:
+    """Normalise provider URLs (Neon/Render/Heroku style) for SQLAlchemy + psycopg."""
+    raw = os.getenv(
         "DATABASE_URL",
         "postgresql+psycopg://return:return_dev_pw@127.0.0.1:5433/return_dev",
-    )
+    ).strip()
+    if raw.startswith("postgres://"):
+        raw = "postgresql://" + raw[len("postgres://") :]
+    if raw.startswith("postgresql://"):
+        raw = "postgresql+psycopg://" + raw[len("postgresql://") :]
+    return raw
+
+
+class Config:
+    SECRET_KEY = os.getenv("FLASK_SECRET_KEY", "dev-only-return-session-secret")
+    SQLALCHEMY_DATABASE_URI = _database_url()
     SQLALCHEMY_TRACK_MODIFICATIONS = False
-    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_size": 5}
+    SQLALCHEMY_ENGINE_OPTIONS = {"pool_pre_ping": True, "pool_size": 5, "pool_recycle": 280}
 
     SESSION_COOKIE_NAME = "rt_session"
     CSRF_COOKIE_NAME = "rt_csrf"
     SESSION_TTL = timedelta(hours=int(os.getenv("SESSION_TTL_HOURS", "24")))
-    SESSION_COOKIE_SECURE = _bool("SESSION_COOKIE_SECURE", False)
+    # HTTPS is the default whenever the app advertises itself as production.
+    SESSION_COOKIE_SECURE = _bool(
+        "SESSION_COOKIE_SECURE",
+        os.getenv("FLASK_ENV", "development").strip().lower() in {"production", "prod"},
+    )
     SESSION_COOKIE_SAMESITE = "Lax"
+
+    # Trust one reverse-proxy hop (Render/Vercel) for client IP and scheme.
+    TRUST_PROXY_HEADERS = _bool("TRUST_PROXY_HEADERS", False)
 
     CORS_ALLOWED_ORIGINS = [
         origin.strip()

@@ -1,0 +1,30 @@
+# Local virtualenvs and caches must never enter the production image.
+.venv
+venv
+__pycache__
+*.py[cod]
+.pytest_cache
+.mypy_cache
+.ruff_cache
+
+# Local PostgreSQL cluster and logs
+.pgdata
+.pglog
+.pginit.log
+*.log
+
+# Secrets / local env files
+.env
+.env.*
+!.env.example
+
+# VCS / editors / OS
+.git
+.gitignore
+.vscode
+.idea
+.DS_Store
+Thumbs.db
+
+# Tests are not needed at runtime (run them in CI instead)
+tests

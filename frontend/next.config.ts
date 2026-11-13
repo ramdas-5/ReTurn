@@ -7,10 +7,11 @@ import type { NextConfig } from "next";
  *
  * `FLASK_API_URL` is server-only and must never be exposed as NEXT_PUBLIC_*.
  */
-const flaskApiUrl = process.env.FLASK_API_URL ?? "http://127.0.0.1:5000";
+const flaskApiUrl = (process.env.FLASK_API_URL ?? "http://127.0.0.1:5000").replace(/\/+$/, "");
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // Vercel manages its own output; `standalone` is only for self-hosted/Docker.
+  output: process.env.VERCEL ? undefined : "standalone",
   reactStrictMode: true,
   poweredByHeader: false,
   async rewrites() {

@@ -16,6 +16,7 @@ import Link from "next/link";
 
 import { Brand, RouteMark } from "@/components/Brand";
 import { getMe } from "@/lib/server";
+import type { AuthMe } from "@/lib/types";
 import { homeFor } from "@/lib/roles";
 
 const CHECKS = [
@@ -75,7 +76,13 @@ const PROCESS = [
 ];
 
 export default async function LandingPage() {
-  const me = await getMe();
+  let me: AuthMe | null = null;
+  try {
+    me = await getMe();
+  } catch {
+    // The public landing page must still render while the API is unreachable
+    // (for example during a free-tier cold start).
+  }
   const startHref = me ? homeFor(me.user.role) : "/auth";
   const signInHref = me ? homeFor(me.user.role) : "/auth";
 

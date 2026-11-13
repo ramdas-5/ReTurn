@@ -31,3 +31,7 @@ Thumbs.db
 playwright-report/
 test-results/
 coverage/
+
+# Deployment tooling
+.vercel/
+render-build/

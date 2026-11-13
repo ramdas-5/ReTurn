@@ -3,6 +3,6 @@ node_modules
 out
 .git
 *.log
-.env.local
-.env.*.local
+.env
+.env.*
 coverage
