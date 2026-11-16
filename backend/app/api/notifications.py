@@ -1,14 +1,15 @@
-"""In-app notifications for the signed-in user."""
+"""In-app notification feed (the client polls this authenticated endpoint)."""
 from __future__ import annotations
 
 from flask import Blueprint, jsonify, request
 
-from ..domain import iso, utcnow
-from ..errors import ApiError
+from .. import domain
+from ..errors import ApiError, paginate
 from ..extensions import db
 from ..models import Notification
 from ..security import current_user, login_required
 from ..serializers import serialize_notification
+from ..validation import pagination_args
 
 bp = Blueprint("notifications", __name__, url_prefix="/api/v1/notifications")
 
@@ -16,50 +17,41 @@ bp = Blueprint("notifications", __name__, url_prefix="/api/v1/notifications")
 @bp.get("")
 @login_required
 def list_notifications():
-    user = current_user()
-    limit = min(max(int(request.args.get("limit", "20")), 1), 50)
-    query = Notification.query.filter_by(user_id=user.id)
-    unread_only = request.args.get("unread") in {"1", "true"}
-    if unread_only:
+    query = Notification.query.filter_by(user_id=current_user().id)
+    if request.args.get("unread") in {"1", "true", "yes"}:
         query = query.filter(Notification.read_at.is_(None))
-    rows = query.order_by(Notification.created_at.desc()).limit(limit).all()
-    unread_count = Notification.query.filter(
-        Notification.user_id == user.id, Notification.read_at.is_(None)
+    query = query.order_by(Notification.created_at.desc())
+    page, per_page = pagination_args()
+    return paginate(query, page, per_page, serialize_notification)
+
+
+@bp.get("/unread-count")
+@login_required
+def unread_count():
+    count = Notification.query.filter_by(
+        user_id=current_user().id, read_at=None
     ).count()
-    return jsonify(
-        {
-            "data": [serialize_notification(row) for row in rows],
-            "meta": {"unread_count": unread_count},
-        }
-    )
+    return jsonify({"data": {"unread": count}})
 
 
-@bp.patch("/<int:notification_id>")
+@bp.post("/<int:notification_id>/read")
 @login_required
 def mark_read(notification_id: int):
-    user = current_user()
-    notification = Notification.query.get(notification_id)
-    if notification is None or notification.user_id != user.id:
-        raise ApiError("notification_not_found", "That notification does not exist.", 404)
-    if notification.read_at is None:
-        notification.read_at = utcnow()
+    row = db.session.get(Notification, notification_id)
+    if row is None or row.user_id != current_user().id:
+        raise ApiError("not_found", "That notification does not exist.", 404)
+    if row.read_at is None:
+        row.read_at = domain.utcnow()
         db.session.commit()
-    return jsonify(
-        {
-            "data": {
-                "notification": serialize_notification(notification),
-                "read_at": iso(notification.read_at),
-            }
-        }
-    )
+    return jsonify({"data": serialize_notification(row)})
 
 
 @bp.post("/read-all")
 @login_required
 def mark_all_read():
-    user = current_user()
-    updated = Notification.query.filter(
-        Notification.user_id == user.id, Notification.read_at.is_(None)
-    ).update({"read_at": utcnow()})
+    now = domain.utcnow()
+    updated = Notification.query.filter_by(
+        user_id=current_user().id, read_at=None
+    ).update({"read_at": now})
     db.session.commit()
-    return jsonify({"data": {"marked_read": int(updated)}})
+    return jsonify({"data": {"marked_read": updated}})

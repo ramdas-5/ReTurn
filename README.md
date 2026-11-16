@@ -1,318 +1,256 @@
-# ReTurn — Smart Reverse Delivery & Shared Logistics Platform
+# ReTurn — Reverse Delivery & Shared Logistics
 
-**One Route. Multiple Deliveries. Less Waste.**
+**One route. Multiple deliveries. Less waste.**
 
-ReTurn coordinates two distinct services — **product returns to an authorised return destination** and **ordinary parcel deliveries to a recipient's own address** — and searches for a genuinely feasible shared multi-stop route. It is a coordination and constrained route-planning application. ReTurn does not own courier vehicles, does not claim trained AI, and labels every distance/fuel/emissions figure as an **estimate**.
+ReTurn is a four-role logistics platform for **parcel delivery** and **product returns**. Consumers book orders, operations managers review and dispatch them, drivers execute routes with proof, and administrators control the platform and audit evidence. Shared routes are only created when the server proves them feasible.
 
-The core innovation is a real, explainable matching engine: separate requests become one ordered pickup/delivery itinerary only when windows, deadlines, precedence, capacity at every stop, handling, service area, detour and estimated savings all pass. Nearby requests are rejected with reasons when they are not compatible.
+The platform is honest by design:
+
+- no public driver, manager or administrator registration;
+- no delivery completion without captured proof when proof is required;
+- no invented GPS positions;
+- no fabricated dashboard statistics — every figure is counted from PostgreSQL rows;
+- distance, fuel and CO₂ figures are labelled **modelled estimates**, never measured telemetry.
 
 ---
 
-## 1. Stack (mandatory choices preserved)
+## 1. Stack
 
 | Layer | Implementation |
 |---|---|
-| Frontend | **Next.js 15 App Router + React 19 + TypeScript** (`frontend/`) |
-| Styling | Tailwind CSS + ReTurn semantic tokens, Lucide icons, Plus Jakarta Sans / Inter / IBM Plex Mono |
-| Forms & client data | React Hook Form + Zod, TanStack Query for notifications/live client state |
-| API | **Python + Flask 3 REST API** (`backend/`), versioned `/api/v1` |
-| Database | **PostgreSQL** + SQLAlchemy 2 + **Alembic migrations** (no SQLite/MySQL fallback) |
-| Auth | Server-side sessions (hashed tokens in PostgreSQL), HttpOnly `rt_session` cookie, CSRF double-submit + server-bound token, Argon2id password hashing, RBAC, rate limiting |
-| Maps | Leaflet + OpenStreetMap tiles, client-only rendering |
-| Routing | OSRM table/route calls when reachable; deterministic labelled estimate fallback |
-| Matching | Rule-based feasibility + pickup/delivery insertion heuristic in Python |
-| Tests | Pytest (27 tests) + Vitest (5 tests) + Next.js production build/typecheck/lint |
-| Local setup | Docker Compose, `.env.example`, Alembic migration, deterministic seed script |
-
-The browser always calls same-origin `/api/v1/*`; Next.js rewrites that to Flask (`FLASK_API_URL`, server-only). Flask remains the authority for auth, permissions, matching, writes and data.
+| Frontend | Next.js 15 App Router, React 19, TypeScript, Tailwind CSS |
+| Data fetching | TanStack Query in client components; server-side role guards and cookie forwarding |
+| API | Flask 3 REST API at `/api/v1`, twelve blueprints |
+| Database | PostgreSQL + SQLAlchemy 2 + Alembic |
+| Auth | Server-side sessions, HttpOnly `rt_session`, CSRF double-submit + session-bound token, Argon2id, RBAC, rate limits |
+| Mapping | Leaflet + OpenStreetMap, client-only |
+| Charts | Recharts, client-only |
+| Routing | OSRM when reachable; clearly labelled deterministic fallback otherwise |
+| Media | Private local storage in development, S3 adapter available |
+| Tests | Pytest (PostgreSQL) + Vitest + Next typecheck/lint/production build |
 
 ---
 
-## 2. What is implemented
+## 2. Roles and workflows
 
-### Customer (9 views)
-Landing, auth, dashboard, guided **Return a product** and **Send a parcel** forms, searchable request list, request tracking with parcel-level timeline and map context, history, profile/settings.
+### Consumer (`/consumer`)
+- register, sign in, reset password, activate an invited account;
+- dashboard with real active orders, history and notifications;
+- send a parcel or create a product return with exterior photo (or documented exception), real availability check, pickup window and deadline;
+- order detail, dedicated tracking timeline, cancellation before custody, additional photos, support issues;
+- saved addresses, business profile, notification preferences and password change.
 
-Customers can:
-- create requests with a real pickup, distinct authorised return destination or recipient destination, window, deadline and parcel attributes;
-- see only their own requests and their own parcel events;
-- cancel while the request is still pending or inside a *proposed* (not yet partner-accepted) batch;
-- report delivery issues without silently altering execution status.
+### Driver (`/driver`)
+- mobile-first dashboard with duty state, vehicle load and next stop;
+- start/end duty, change availability, heartbeat and consent-based location updates;
+- assigned orders and batches, ordered route map, navigation links;
+- accept work, mark arrival, confirm pickup with photo and location, depart, go out for delivery, complete with delivery proof;
+- report delivery exceptions, view history, edit vehicle details, notifications.
 
-### Delivery partner (7 views)
-Dashboard/next stop, available/offered batches, batch detail, route execution, parcel status management, completed work/history, vehicle & profile.
+### Manager (`/manager`)
+- operations summary scoped to service areas;
+- order review (approve/reject), assignment and reassignment with server-revalidated eligibility;
+- pending assignments, batch creation, batch detail with route stops, reassignment and cancellation;
+- route-aware suggestion scan, approval and rejection with capacity/detour evidence;
+- driver list and driver account creation, live duty/tracking board, route and progress views;
+- proof verification, driver exceptions, consumer issues, operational reports.
 
-Partners can:
-- maintain vehicle type, weight/volume capacity, fragile/restricted capability, service areas, availability and operating hours;
-- see only offers addressed to them plus proposals their verified profile could serve;
-- accept or decline with an audited reason;
-- start an accepted route and update **each parcel independently** through legal transitions;
-- report failed handovers (creates an issue, requires a reason).
+### Administrator (`/admin`)
+- global dashboard, analytics and sustainability estimates with methodology;
+- global live operations and route monitoring;
+- all orders and batches with dispatch controls;
+- consumer, business, manager and driver administration; driver and vehicle verification; account suspension;
+- service area CRUD, matching configuration, proof audit, audit logs, platform settings;
+- manager and driver account provisioning with one-time activation tokens.
 
-### Administrator (8 views)
-Operations dashboard, customers, partners, request queue with detail, batch management + matching console, route monitor, issue queue, analytics/estimated sustainability.
-
-Admins can:
-- run a matching preview over real pending requests with configurable thresholds;
-- inspect feasible groups, reasons for inclusion and machine-readable near-miss reasons;
-- commit a proposal atomically (feasibility is recomputed; concurrency is locked);
-- offer a verified eligible partner, reassign with a mandatory reason, cancel and release safely;
-- verify/reject partners, disable customer accounts, resolve issues;
-- inspect operational KPIs and an estimate-only sustainability report with factors and methodology.
-
-The 24 routes are exactly those in `skill.md` (plus branded `not-found`, `error`, `forbidden` and loading states).
-
----
-
-## 3. Matching engine (core)
-
-Implementation: `backend/app/services/matching.py`.
-
-For every candidate group the engine checks:
-
-1. **Locations exist** and every request keeps its own destination identity.
-2. **Pickup windows** are hard constraints — the schedule plans no lateness; waiting is allowed.
-3. **Precedence** — a parcel's pickup index must be before its drop-off index.
-4. **Deadlines** — simulated arrival at each drop-off must beat the request deadline.
-5. **Capacity after every stop** — weight and volume are increased at pickups and released at drop-offs; the peak must fit the partner/reference vehicle.
-6. **Handling** — fragile/restricted capability; restricted items cannot share a batch (dedicated vehicle semantics).
-7. **Partner eligibility** — verified, available, operating area, handling, capacity.
-8. **Pickup radius and per-request detour** — configurable coarse prefilter and maximum extra distance.
-9. **Positive benefit** — the shared distance must beat the sum of direct pickup→destination trips by at least `min_savings_pct`; zero/negative savings are rejected.
-10. **One active reservation** — a PostgreSQL partial unique index on `batch_requests(request_id) WHERE released_at IS NULL` prevents double booking, even concurrently.
-
-The scheduler inserts each request's pickup/drop-off pair into every legal position of the current ordered stop list, evaluates hard constraints, and selects the lowest-distance feasible insertion. Groups are built greedily over pending requests (up to the configured cap) and each accepted group is re-solved independently before it is proposed.
-
-Every proposal stores: ordered stops with planned arrival/departure, leg distances/durations, load after each stop, baseline and shared distance, source of distance, geometry/source, explanation reasons, assumptions, detour and vehicle metadata. A `matching_runs` row stores the whole preview result for audit.
-
-Rejection codes include `window_conflict`, `deadline_missed`, `capacity_exceeded`, `handling_incompatible`, `restricted_exclusive`, `pickup_radius`, `service_area`, `insufficient_savings`, `already_reserved`, `not_pending`, `no_compatible_group`.
-
-### Distance and environmental honesty
-
-- `ROUTING_PROVIDER=auto` tries OSRM with a short timeout. On success, the matrix and geometry are labelled **OSRM road routing**.
-- On failure, distance = haversine × configurable road factor; duration = distance / configurable speed. Labels literally say **estimated / not road navigation**; map connectors are dashed and captioned **illustrative**.
-- The separate-trip baseline is one direct pickup→destination trip per request on the *same* distance basis; partner repositioning is excluded from both sides and this is disclosed.
-- Fuel and CO₂e use configurable factors (`SUSTAINABILITY_FUEL_L_PER_KM`, `SUSTAINABILITY_KG_CO2E_PER_LITRE`). Reports never call them measured and clamp negative deltas to zero benefit.
-- No live GPS, courier telemetry or invented vehicle positions are rendered.
+Every read and write is authorized by Flask. Hiding a button is never the security boundary.
 
 ---
 
-## 4. Demo scenario (fictional)
+## 3. Implemented API surface
 
-Seeded by `backend/app/services/seed.py`; all names, addresses and phone numbers are fictional. Area coordinates are approximate demo points.
+| Area | Endpoints |
+|---|---|
+| Auth | `/auth/csrf`, `/register`, `/login`, `/logout`, `/me`, `/password`, `/forgot-password`, `/reset-password`, `/activate`, `/resend-activation` |
+| Consumers | `/consumer/summary`, `/consumer/notification-preferences` |
+| Orders | `/orders` (create/list/detail), `/orders/<id>/tracking`, `/cancel`, `/images`, `/availability` |
+| Returns | `/returns` (create/list/detail), `/returns/<id>/cancel` |
+| Accounts | `/users/me`, `/users/me/addresses`, `/business-profiles/me`, `/users/managers`, `/users/drivers`, `/users/<id>/status`, `/users/<id>/driver-verification` |
+| Driver | `/driver/profile`, `/driver/vehicle`, `/driver/duty*`, `/driver/location`, `/driver/summary`, `/driver/assignments*`, `/driver/orders/<id>/{accept,arrived-pickup,pickup,depart,out-for-delivery,delivery-proof,exception}`, `/driver/batches*` |
+| Manager | `/manager/summary`, `/manager/orders*`, `/manager/drivers*`, `/manager/batches*`, `/manager/matching/*`, `/manager/proofs*`, `/manager/exceptions*` |
+| Admin | `/admin/summary`, `/admin/analytics*`, `/admin/consumers`, `/admin/businesses`, `/admin/managers`, `/admin/drivers`, `/admin/vehicles*`, `/admin/orders*`, `/admin/batches*`, `/admin/operations/live`, `/admin/proofs*`, `/admin/service-areas*`, `/admin/matching-config`, `/admin/settings*`, `/admin/audit`, `/admin/exceptions*` |
+| Shared | `/health`, `/issues`, `/notifications`, `/service-areas`, `/vehicle-capacity-profiles`, `/media/<id>` (signed) |
 
-| Request | Customer | Service | Route | Purpose |
-|---|---|---|---|---|
-| `RTN-REQ-1001` | Rahul Basu | Return (shoes) | Barasat → Authorised Returns Hub — New Town | Feasible group member |
-| `RTN-REQ-1002` | Priya Sen | Parcel (book) | Barasat → Salt Lake recipient | Feasible group member with a different destination |
-| `RTN-REQ-1003` | Amit Roy | Return (headphones, fragile) | Barasat → Authorised Returns Hub — Salt Lake | Third distinct destination; fragile handling |
-| `RTN-REQ-1004` | Sneha Mitra | Return (55 kg desk) | Barasat → Barasat hub | **Capacity counterexample** |
-| `RTN-REQ-1005` | Vikram Nair | Parcel (documents) | Barasat → Dum Dum | **Deadline conflict counterexample** |
-| `RTN-REQ-1006` | Farhan Ali | Parcel (restricted battery) | Barasat → Salt Lake | **Handling/restricted counterexample** |
-| `RTN-REQ-1007/1008` | Neha / Arjun | Mixed | New Town + Salt Lake → hub/Birati | Completed history batch for analytics |
+---
 
-Seed also includes one verified van partner, one pending partner, one completed batch with parcel tracking events, two issues (one open) and audit rows.
+## 4. Dispatch and matching rules
 
-### Demo credentials (development only — fictional accounts)
+The matching engine (`backend/app/services/matching.py`) evaluates a new order against each driver's **active route**:
 
-All seeded accounts use password **`ReTurn#2026`**.
+1. driver verified and active; vehicle active and verified;
+2. live duty session with a fresh heartbeat;
+3. driver covers the pickup service area;
+4. projected parcel/weight/volume load fits the vehicle;
+5. pickup lies within the configured route corridor;
+6. inserting pickup **before** delivery preserves precedence;
+7. simulated arrivals respect the pickup window and delivery deadline;
+8. added detour and added duration are within configured limits;
+9. every result stores reasons, blockers, capacity snapshot and proposed sequence.
+
+A manager must approve a suggestion; approval re-runs the evaluation before assigning. The scan never auto-assigns.
+
+Delivery completion is validated server-side: proof photo, capture time, accuracy, distance from the stop, duty session and signed media access. `DELIVERY_PROOF_REQUIRED=true` by default. A driver who cannot capture proof reports `proof_capture_failed`; the delivery is not marked complete.
+
+---
+
+## 5. Demo data
+
+`python manage.py seed` resets the **local development database** and creates a fictional scenario:
+
+- 5 service areas around Kolkata;
+- 1 administrator, 1 manager, 2 drivers, 3 consumers;
+- 6 orders: review queue, active shared route, an on-route suggestion, a delivered order with proof, and an exception;
+- 1 active batch, 1 pending matching suggestion, 1 proof image, notifications and audit rows.
+
+All demo accounts use password **`ReTurn#2026`**.
 
 | Role | Email |
 |---|---|
 | Administrator | `admin@return.demo` |
-| Verified partner | `partner@return.demo` |
-| Pending partner | `partner2@return.demo` |
-| Customers | `rahul@return.demo`, `priya@return.demo`, `amit@return.demo`, and counterexample customers (`sneha@`, `vikram@`, `farhan@`, `neha@`, `arjun@return.demo`) |
+| Manager | `manager@return.demo` |
+| Drivers | `arjun@return.demo`, `vikram@return.demo` |
+| Consumers | `priya@return.demo` (business), `rahul@return.demo`, `amit@return.demo` |
 
-> These accounts are for the local demonstration only. Never enable or reuse demo credentials in a production deployment.
+> Demo accounts and data are fictional. Never enable demo seeding on a deployment that stores real personal data.
 
-### Judge walkthrough
+### Suggested walkthrough
 
-1. Sign in as `admin@return.demo`.
-2. Open **Batches → Find compatible requests**. Inspect the feasible group (returns + parcel, three different destinations), load profile, distance source, savings and rejection reasons for the capacity/deadline/restricted counterexamples.
-3. Create the proposed batch (optionally offer it to the verified partner in the same run).
-4. Sign in as `partner@return.demo`; accept the offer and **Start route**.
-5. Open **Parcels** and advance each parcel independently: arrived → picked up → in transit → delivered. Try an illegal transition (new batch) to see the 409 guard.
-6. Sign in as `rahul@return.demo` (or the other customers) to see only that customer's parcel timeline and shared-batch stops; the other customers' details are not exposed.
-7. Back as admin, open **Analytics** for estimated distance/fuel/CO₂e totals, factors, methodology and the ledger. All figures are labelled estimates.
-
-You can also create a fresh return/parcel as any customer; the default windows are generated 90–180 minutes ahead so the demonstration remains feasible. The seed resets relative windows when re-run.
+1. Sign in as the manager, open **Order queue**, approve a pending order.
+2. Open **Pending assignments**, then the order, and scan active routes.
+3. Approve a feasible suggestion or assign a driver directly.
+4. Sign in as the assigned driver, start duty, accept the work and complete the lifecycle. Delivery proof requires a photo and location.
+5. Sign in as the consumer to follow the parcel-level timeline and proof.
+6. Sign in as the administrator to inspect analytics, verify a proof, tune matching, or review the audit log.
 
 ---
 
-## 5. Quick start
-
-### Option A — Docker Compose (recommended)
-
-```bash
-cp .env.example .env          # optional; change FLASK_SECRET_KEY for anything shared
-docker compose up --build
-```
-
-- Frontend: http://localhost:3000
-- API health: http://localhost:5000/api/v1/health
-- PostgreSQL: `localhost:5433` (`return` / `return_dev_pw` / `return_dev`)
-
-The backend container runs `flask db upgrade` on start. With `SEED_DEMO_DATA=true` (compose default) it also seeds the fictional demo scenario **only when the database has no users**. Set `SEED_DEMO_DATA_RESET=true` to force a destructive wipe + re-seed — intended for demo environments only.
-
-### Option B — Local processes
+## 6. Local setup
 
 Prerequisites: Python 3.11+, Node 20+, PostgreSQL 16+.
 
 ```bash
-# 1. Database (adjust to your PostgreSQL install)
-createdb -h 127.0.0.1 -p 5432 -U postgres return_dev
-# Create a role/password and set DATABASE_URL accordingly, or use the example env.
+cp .env.example .env                 # development defaults; change secrets for anything shared
 
-# 2. Backend
+# Backend
 cd backend
 python -m venv .venv
-source .venv/bin/activate            # Windows: .venv\Scripts\activate
+source .venv/bin/activate            # Windows: .venv/Scripts/activate
 pip install -r requirements.txt
-cp ../.env.example ../.env            # edit DATABASE_URL if your port differs
 flask --app wsgi db upgrade
 python manage.py seed
-flask --app wsgi run --port 5000      # or: python wsgi.py
+flask --app wsgi run --port 5000
 
-# 3. Frontend (another terminal)
+# Frontend (second terminal)
 cd frontend
 npm install
-npm run dev                           # http://localhost:3000
+npm run dev                          # http://localhost:3000
 ```
 
-For the Windows development environment used to build this project, PostgreSQL was initialised as a project-local cluster on port **5433** (because Docker Desktop's daemon was not running):
+`python manage.py seed` is optional: it resets the local database and loads the fictional demo scenario. For a clean database, create the first administrator instead:
+
+```bash
+flask --app wsgi bootstrap-admin --email admin@example.com --name "Operations Admin"
+```
+
+Without `--password` (or `BOOTSTRAP_ADMIN_PASSWORD`) the command prints a generated password once. It also inserts the permission catalogue, rejection codes and vehicle capacity profiles, and refuses to create a second administrator. Sign in as that account and create service areas, managers and drivers from `/admin`.
+
+The frontend proxies `/api/v1/*` to `FLASK_API_URL` (default `http://127.0.0.1:5000`). Server layouts call Flask through `API_INTERNAL_URL`. Neither variable may be exposed as `NEXT_PUBLIC_*`.
+
+### PostgreSQL on this machine
+
+The verified local environment uses a project-local PostgreSQL 18 cluster on port **5433**:
 
 ```bash
 PGBIN="/c/Program Files/PostgreSQL/18/bin"
-"$PGBIN/initdb.exe" -D backend/.pgdata -U postgres -A trust
 "$PGBIN/pg_ctl.exe" -D backend/.pgdata -l backend/.pglog -o "-p 5433" start
-"$PGBIN/psql.exe" -h 127.0.0.1 -p 5433 -U postgres -d postgres \
-  -c "CREATE ROLE return LOGIN PASSWORD 'return_dev_pw' CREATEDB;" \
-  -c "CREATE DATABASE return_dev OWNER return;" \
-  -c "CREATE DATABASE return_test OWNER return;"
 ```
 
-`backend/.pgdata` is git-ignored. The documented defaults in `.env.example` point at port 5433.
+Databases: `return_dev` and `return_test`; role `return` / `return_dev_pw`. `backend/.pgdata` is ignored by Git.
 
-### Environment
+### Docker Compose
 
-Copy `.env.example` to `.env` (loaded by Flask). Copy `frontend/.env.example` to `frontend/.env.local` if you need to override the proxy target.
-
-Never prefix the Flask URL, database URL or Flask secret with `NEXT_PUBLIC_`; those remain server-only.
-
-### Deployment (production)
-
-The repository is deploy-ready for **Vercel (frontend) + Render (Flask Docker) + Neon (PostgreSQL)**. Full step-by-step instructions, environment variables, manual tasks, verification and troubleshooting are in **[`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md)**.
-
-Short version:
-
-1. Create a Neon PostgreSQL database and copy the **direct** connection string.
-2. Render → **New → Blueprint** → select this repo; paste `DATABASE_URL`; note the API URL.
-3. Vercel → import this repo → **Root Directory: `frontend`** → add `FLASK_API_URL` and `API_INTERNAL_URL` (both = the Render API URL) → deploy.
-4. Warm up `https://<api>/api/v1/health`, then sign in with the seeded demo accounts.
-5. Before storing real data: set `SEED_DEMO_DATA=false` and remove the demo accounts.
-
-`render.yaml`, `frontend/vercel.json` and `backend/.dockerignore` are included. The container respects `$PORT`, runs Alembic on boot, and seeds only when the database is empty (`SEED_DEMO_DATA_RESET=true` opts into destructive re-seeding).
-
----
-
-## 6. Commands
-
-| Task | Command |
-|---|---|
-| Backend tests | `cd backend && .venv/Scripts/python -m pytest tests -q` (Linux/macOS: `.venv/bin/python`) |
-| Apply migrations | `cd backend && flask --app wsgi db upgrade` |
-| Check migration drift | `cd backend && flask --app wsgi db check` |
-| Seed / reset demo data | `cd backend && python manage.py seed` |
-| Seed only if empty (container) | `cd backend && python manage.py seed-if-empty` |
-| Seed row counts | `cd backend && python manage.py check` |
-| Run API | `cd backend && flask --app wsgi run --port 5000` |
-| Frontend dev | `cd frontend && npm run dev` |
-| Typecheck | `cd frontend && npm run typecheck` |
-| Lint | `cd frontend && npm run lint` |
-| Frontend unit tests | `cd frontend && npm test` |
-| Production build | `cd frontend && npm run build` |
-| Production server | `cd frontend && npm start` |
-
-### Verification actually run in this build
-
-- `pytest tests -q` → **27 passed** (PostgreSQL `return_test`).
-- `vitest run` → **5 passed**.
-- `tsc --noEmit` → **0 errors**.
-- `next lint` → **0 errors**, two advisory `exhaustive-deps` warnings resolved in follow-up.
-- `next build` → **successful production build**.
-- `flask db check` → **No new upgrade operations detected**.
-- Manual end-to-end smoke test through the Next same-origin proxy on PostgreSQL: CSRF bootstrap → admin login → `/auth/me` → live-OSRM matching preview (3 requests, 3 distinct destinations, 44.6% estimated saving) → commit to the verified partner → partner accept → start route → `pickup_arrived`/`picked_up`/`in_transit`/`delivered` for every parcel → batch completed; an illegal post-completion event returned **409**; the customer's payload contained no other customer identities; authenticated landing/auth/role pages returned 200.
-- Docker Compose files were authored but **not executed** in this environment because the Docker daemon was unavailable; the same stack was verified locally with PostgreSQL 18 on port 5433, Flask and the built Next.js server.
-
-No automated browser E2E suite (Playwright) is included; UI interactions were verified by typecheck/build and API flow tests rather than exhaustive browser automation.
-
----
-
-## 7. Security model
-
-- **Passwords:** Argon2id (`argon2-cffi`), no plaintext logging.
-- **Sessions:** random 32-byte token, only SHA-256 hash stored in PostgreSQL; expiry, revocation, user-agent/IP metadata; HttpOnly `rt_session`, `SameSite=Lax`, `Secure` configurable for HTTPS.
-- **CSRF:** every mutating `/api/v1` request requires `X-CSRF-Token` matching a first-party cookie; for authenticated requests it must also equal the token bound to the server-side session. `GET /api/v1/auth/csrf` bootstraps the cookie.
-- **Authorization:** every read/write is scoped server-side. Customers read only their own requests; partners read only assigned/eligible batches; admin endpoints use role decorators. Hiding a button is never the boundary.
-- **Privacy:** customer contact data is returned only to the customer, assigned partner after acceptance, or administrators. Batch serialization for customers never includes other customers' requests.
-- **Rate limiting:** in-process sliding window on login, registration, matching and parcel updates. It is single-process by design; a multi-instance deployment should use Redis or an API gateway.
-- **Database integrity:** FK constraints, indexes, transactions and row locks; partial unique index prevents a request from being in two active batches. Commit revalidates everything and returns `409` on conflict.
-- **No secrets in the repository:** only `.env.example` values, explicitly development-only.
-
-Known limitations: no email delivery (in-app notifications only), no MFA/email verification, no payment integration, no asset uploads, in-memory rate limiting, and demo accounts remain available while seeding is enabled.
-
----
-
-## 8. Status model
-
-- **Request:** `pending_matching → batched → assigned → in_progress → completed`, plus controlled `cancelled` and `failed`.
-- **Batch:** `proposed → offered → accepted → in_progress → completed`, plus `declined`/`cancelled`.
-- **Parcel:** `pending → assigned → partner_accepted → pickup_arrived → picked_up → in_transit → delivered`, with `failed`.
-
-Transitions are validated server-side. `delivered` is impossible before pickup. A failed parcel creates an issue and keeps its tracking history. A batch is completed only when every parcel on it is terminal. Cancelling a proposal releases all reservations; cancellation is blocked once a partner is engaged.
-
----
-
-## 9. Repository layout
-
-```text
-/
-├── agent.md, skill.md, design.md, ReTurn_MASTER_PROMPT.md
-├── README.md
-├── .env.example
-├── docker-compose.yml
-├── backend/
-│   ├── app/                 # factory, models, security, serializers, APIs, services
-│   │   ├── api/             # auth, requests, matching, batches, parcels, partners, …
-│   │   ├── services/        # matching, routing, dispatch, analytics, seed
-│   │   └── ...
-│   ├── migrations/          # Alembic (PostgreSQL)
-│   ├── tests/               # pytest suite
-│   ├── manage.py            # seed/check
-│   ├── wsgi.py
-│   ├── Dockerfile
-│   └── requirements.txt
-├── frontend/
-│   ├── src/app/             # 24 App Router views + role layouts/errors/loading
-│   ├── src/components/      # design system, forms, maps, dispatch controls
-│   ├── src/lib/             # typed API client, server fetch, types, formatting
-│   ├── Dockerfile
-│   └── ...
-└── docs/
-    ├── ARCHITECTURE.md
-    └── ASSUMPTIONS.md
+```bash
+docker compose up --build
 ```
 
+- frontend `http://localhost:3000`
+- API health `http://localhost:5000/api/v1/health`
+- PostgreSQL `localhost:5433`
+
+The backend entrypoint runs Alembic and seeds only when the database has no users. Media is stored in the `return_media` volume; local media is not suitable for multi-instance production.
+
 ---
 
-## 10. Explicit limitations and future scope
+## 7. Verification
 
-- OSRM public service may be rate-limited or unreachable; the app remains functional with labelled estimates and never presents them as road navigation.
-- The optimizer is a deterministic insertion heuristic, not an exact solver or ML model. It is suitable for small demo sets (2–4 requests per batch).
-- No real courier/e-commerce integrations, payments, live GPS telemetry, driver mobile app, multi-city tenancy or measured emissions.
-- Maps require browser network access for OpenStreetMap tiles; the map degrades to a labelled placeholder message when coordinates are absent, and route data remains usable.
-- Email notifications, MFA, partner document uploads and production-grade distributed rate limiting are future work.
-- Production deployment must set a strong `FLASK_SECRET_KEY`, HTTPS + `SESSION_COOKIE_SECURE=true`, disable demo seeding, and remove seeded accounts.
+Commands used for the final check:
 
-Map data © OpenStreetMap contributors. Routing by OSRM when available.
+```bash
+cd backend && .venv/Scripts/python -m pytest tests -q
+cd frontend && npm run typecheck && npm run lint && npm test && npm run build
+```
+
+Verified in this environment on 16 November 2026:
+
+- **Backend:** 59 passed against PostgreSQL.
+- **Bootstrap:** a fresh database migrated to head and `bootstrap-admin` created exactly one administrator; a second run was refused.
+- **Frontend unit tests:** 3 passed.
+- **TypeScript:** `tsc --noEmit` passed; **lint:** no warnings or errors.
+- **Production build:** `next build` passed; mutating routes are server-rendered and the Recharts analytics bundles compile.
+- **Seeded role smoke:** all four demo roles signed in, read their dashboards, the manager read the seeded batch detail, and the admin read the seeded proof.
+- **Migrations:** a fresh PostgreSQL database upgraded to the current head (`cb7ba7082235`); `flask db check` found no model drift. A second upgrade on the development database was also clean.
+- **Deployment config:** `docker compose config` validated. Container images were not built here because the local Docker daemon was unavailable; no hosted deployment has been performed.
+
+The backend suite requires PostgreSQL; it does not fall back to SQLite. The API flow is covered by Pytest for auth/RBAC, order intake, dispatch eligibility, batch planning, matching, proof validation, admin configuration, issues and driver profile. No Playwright/browser E2E suite is included.
+
+---
+
+## 8. Deployment
+
+The repository supports **Vercel (Next.js) + Render (Flask Docker) + Neon PostgreSQL**. See [`docs/DEPLOYMENT.md`](docs/DEPLOYMENT.md) for account setup, environment variables, migrations, seeding and troubleshooting.
+
+Critical production steps:
+
+1. Set a strong `FLASK_SECRET_KEY`.
+2. Use HTTPS and `SESSION_COOKIE_SECURE=true`.
+3. Set `SEED_DEMO_DATA=false` before real data is stored.
+4. Create the first administrator with `flask --app wsgi bootstrap-admin`, or set `BOOTSTRAP_ADMIN_EMAIL`/`BOOTSTRAP_ADMIN_PASSWORD` so the container does it on boot, then remove the password variable.
+5. Configure the Vercel URL in `CORS_ALLOWED_ORIGINS` (defence in depth).
+6. Use S3 (`MEDIA_BACKEND=s3`) for proof images; Render's local filesystem is ephemeral.
+7. Warm a sleeping free Render service before a demo.
+
+`render.yaml`, `frontend/vercel.json`, Dockerfiles and `.env.example` are included.
+
+---
+
+## 9. Security model
+
+- Argon2id password hashing; no plaintext credentials.
+- Random session token; only a SHA-256 hash is stored. HttpOnly, SameSite=Lax, Secure-configurable cookie.
+- CSRF required on every mutating `/api/v1` request, with a server-bound token for authenticated sessions.
+- RBAC and service-area scoping enforced on every endpoint; consumers only read their own orders; drivers only assigned work; managers only their areas; administrators globally.
+- Signed, expiring media URLs; media is never served from a public static directory.
+- Audit rows for dispatch, proof review, account status, verification, settings, matching configuration and issues.
+- Rate limits on login, registration, order intake, assignments, proof and configuration writes. The limiter is in-process and intended for single-instance deployments.
+
+---
+
+## 10. Honest limitations
+
+- Email delivery, MFA and payment integration are not implemented. Reset/activation tokens are returned in development when `AUTH_EXPOSE_RESET_TOKENS=true`.
+- The matching engine is a deterministic insertion heuristic, not machine learning or an exact solver.
+- OSRM may be unavailable; fallback distances are labelled estimates and maps show illustrative connectors.
+- There is no live vehicle GPS feed. Only consciously shared, on-duty location events are displayed, with stale/unavailable labels.
+- Local media on a single container is ephemeral in hosted environments; use S3 for durable proof storage.
+- No browser automation suite is included; UI verification is typecheck, lint, unit test and production build.
+- Docker Compose configuration is supplied and syntactically validated; container image builds and hosted deployment require a Docker daemon and provider accounts, so they were not exercised here.

@@ -1,190 +1,187 @@
-"""Issue reporting and resolution."""
+"""Issue reporting and resolution for consumers, drivers, managers and admins.
+
+Issues are append-only reports with an audited resolution. They never silently
+change an order's execution status; delivery evidence rules stay authoritative.
+"""
 from __future__ import annotations
 
 from flask import Blueprint, jsonify, request
-from sqlalchemy import or_
 
-from ..access import assert_request_access, partner_user_id_for_request
-from ..domain import (
-    ISSUE_CATEGORIES,
-    ISSUE_OPEN,
-    ISSUE_SEVERITIES,
-    ISSUE_STATUSES,
-    ROLE_ADMIN,
-    ROLE_CUSTOMER,
-    ROLE_PARTNER,
-    iso,
-    utcnow,
-)
-from ..errors import ApiError
+from .. import domain
+from ..access import can_view_order, manager_covers_order
+from ..errors import ApiError, paginate
 from ..extensions import db
-from ..models import BatchRequest, DeliveryBatch, DeliveryRequest, IssueReport
-from ..security import current_user, login_required, role_required
-from ..serializers import serialize_issue
-from ..services import dispatch
-from ..validation import Validator, json_body
+from ..models import DriverAssignment, IssueReport, Order
+from ..security import current_user, login_required, rate_limit, role_required
+from ..services.audit import audit
+from ..services.notifications import ORDER_EXCEPTION, notify_responsible_managers
+from ..validation import Validator, json_body, pagination_args
 
 bp = Blueprint("issues", __name__, url_prefix="/api/v1/issues")
+
+CATEGORIES = ("delivery", "parcel", "pickup", "account", "other")
+SEVERITIES = ("low", "medium", "high")
+
+
+def serialize_issue(row: IssueReport) -> dict:
+    return {
+        "id": row.id,
+        "category": row.category,
+        "severity": row.severity,
+        "subject": row.subject,
+        "description": row.description,
+        "status": row.status,
+        "resolution_note": row.resolution_note,
+        "order_id": row.order_id,
+        "order_number": row.order.order_number if row.order else None,
+        "batch_id": row.batch_id,
+        "reporter": (
+            {"id": row.reporter.id, "full_name": row.reporter.full_name, "role": row.reporter.role}
+            if row.reporter
+            else None
+        ),
+        "resolved_by": (
+            {"id": row.resolved_by.id, "full_name": row.resolved_by.full_name}
+            if row.resolved_by
+            else None
+        ),
+        "resolved_at": domain.iso(row.resolved_at),
+        "created_at": domain.iso(row.created_at),
+        "updated_at": domain.iso(row.updated_at),
+    }
+
+
+def _visible(user) -> list[IssueReport]:
+    rows = IssueReport.query.order_by(IssueReport.created_at.desc()).limit(500).all()
+    if user.role == domain.ROLE_ADMIN:
+        return rows
+    if user.role == domain.ROLE_MANAGER:
+        return [
+            row
+            for row in rows
+            if row.reporter_id == user.id
+            or (row.order is not None and manager_covers_order(user, row.order))
+        ]
+    if user.role == domain.ROLE_CONSUMER:
+        return [
+            row
+            for row in rows
+            if row.reporter_id == user.id
+            or (row.order is not None and row.order.consumer_id == user.id)
+        ]
+    if user.role == domain.ROLE_DRIVER:
+        assigned = {
+            row_.order_id
+            for row_ in DriverAssignment.query.filter_by(driver_id=user.id).all()
+        }
+        return [row for row in rows if row.reporter_id == user.id or row.order_id in assigned]
+    return []
 
 
 @bp.get("")
 @login_required
 def list_issues():
-    user = current_user()
-    query = IssueReport.query
-    if user.role == ROLE_ADMIN:
-        pass
-    elif user.role == ROLE_CUSTOMER:
-        request_ids = [
-            row[0]
-            for row in db.session.query(DeliveryRequest.id)
-            .filter(DeliveryRequest.customer_id == user.id)
-            .all()
-        ]
-        query = query.filter(
-            or_(
-                IssueReport.reporter_id == user.id,
-                IssueReport.request_id.in_(request_ids or [0]),
-            )
-        )
-    elif user.role == ROLE_PARTNER:
-        batch_ids = [
-            row[0]
-            for row in db.session.query(DeliveryBatch.id)
-            .filter(DeliveryBatch.partner_id == user.id)
-            .all()
-        ]
-        query = query.filter(
-            or_(
-                IssueReport.reporter_id == user.id,
-                IssueReport.batch_id.in_(batch_ids or [0]),
-            )
-        )
+    rows = _visible(current_user())
     status = request.args.get("status")
-    if status in ISSUE_STATUSES:
-        query = query.filter(IssueReport.status == status)
-    severity = request.args.get("severity")
-    if severity in ISSUE_SEVERITIES:
-        query = query.filter(IssueReport.severity == severity)
-    rows = query.order_by(IssueReport.created_at.desc()).limit(200).all()
+    if status:
+        if status not in ("open", "in_review", "resolved", "rejected"):
+            raise ApiError("invalid_status", "Unknown issue status.", 422)
+        rows = [row for row in rows if row.status == status]
+    page, per_page = pagination_args()
+    start = (page - 1) * per_page
     return jsonify(
         {
-            "data": [
-                serialize_issue(row, include_contacts=user.role == ROLE_ADMIN)
-                for row in rows
-            ]
+            "data": [serialize_issue(row) for row in rows[start : start + per_page]],
+            "meta": {"page": page, "per_page": per_page, "total": len(rows)},
         }
     )
 
 
 @bp.post("")
 @login_required
+@role_required(domain.ROLE_CONSUMER, domain.ROLE_DRIVER)
+@rate_limit(20, 60, scope="create-issue")
 def create_issue():
     user = current_user()
     data = json_body()
     v = Validator(data)
-    request_id = v.integer("request_id", required=True, minimum=1)
-    category = v.choice("category", ISSUE_CATEGORIES, required=True, default="other")
-    severity = v.choice("severity", ISSUE_SEVERITIES, required=True, default="medium")
+    category = v.choice("category", CATEGORIES, default="other")
+    severity = v.choice("severity", SEVERITIES, default="medium")
+    subject = v.string("subject", required=True, min_length=4, max_length=200)
     description = v.string("description", required=True, min_length=10, max_length=1500)
+    order_id = v.integer("order_id", minimum=1)
     v.finish()
 
-    delivery_request = DeliveryRequest.query.get(request_id)
-    if delivery_request is None:
-        raise ApiError("request_not_found", "That request does not exist.", 404)
-    assert_request_access(user, delivery_request)
-    link = BatchRequest.query.filter(
-        BatchRequest.request_id == delivery_request.id, BatchRequest.released_at.is_(None)
-    ).first()
-    batch_id = link.batch_id if link else None
-    issue = IssueReport(
-        request_id=delivery_request.id,
-        batch_id=batch_id,
+    order = None
+    if order_id is not None:
+        order = db.session.get(Order, order_id)
+        if order is None or not can_view_order(user, order):
+            raise ApiError("not_found", "That order does not exist.", 404)
+
+    row = IssueReport(
+        order_id=order.id if order else None,
         reporter_id=user.id,
         category=category,
         severity=severity,
+        subject=subject,
         description=description,
-        status=ISSUE_OPEN,
+        status="open",
     )
-    db.session.add(issue)
-    dispatch.notify_admins(
-        "issue_created",
-        "New issue reported",
-        f"{delivery_request.code}: {description[:140]}",
-        "/admin/issues",
+    db.session.add(row)
+    db.session.flush()
+    audit(
+        "issue.reported",
+        "issue_report",
+        row.id,
+        actor=user,
+        summary=f"Issue reported: {subject}",
+        reason=description,
     )
-    if user.role == ROLE_CUSTOMER and batch_id:
-        partner_id = partner_user_id_for_request(delivery_request)
-        if partner_id:
-            dispatch.notify(
-                partner_id,
-                "issue_created",
-                "Customer reported an issue",
-                f"{delivery_request.code}: {description[:140]}",
-                f"/partner/batches/{batch_id}",
-            )
-    dispatch.audit(
-        user.id,
-        "issue.created",
-        "issue",
-        None,
-        f"Issue reported on {delivery_request.code}.",
-        reason=description[:300],
-    )
+    if order is not None:
+        address = order.pickup_address
+        notify_responsible_managers(
+            ORDER_EXCEPTION,
+            f"Issue on {order.order_number}",
+            f"{severity.upper()} · {subject}",
+            area_name=address.area if address else None,
+            latitude=address.latitude if address else None,
+            longitude=address.longitude if address else None,
+            link=f"/manager/orders/{order.id}",
+            event_data={"order_id": order.id, "issue_id": row.id},
+        )
     db.session.commit()
-    return jsonify({"data": serialize_issue(issue)}), 201
+    return jsonify({"data": serialize_issue(row)}), 201
 
 
 @bp.patch("/<int:issue_id>")
-@role_required(ROLE_ADMIN)
+@login_required
+@role_required(domain.ROLE_MANAGER, domain.ROLE_ADMIN)
 def resolve_issue(issue_id: int):
-    admin = current_user()
-    issue = IssueReport.query.get(issue_id)
-    if issue is None:
-        raise ApiError("issue_not_found", "That issue does not exist.", 404)
+    user = current_user()
+    row = db.session.get(IssueReport, issue_id)
+    if row is None:
+        raise ApiError("not_found", "That issue does not exist.", 404)
+    if user.role == domain.ROLE_MANAGER and not (
+        row.order is not None and manager_covers_order(user, row.order)
+    ):
+        raise ApiError("forbidden", "That issue is outside your service areas.", 403)
     data = json_body()
     v = Validator(data)
-    status = v.choice("status", ISSUE_STATUSES, required=True)
-    note = v.string("resolution_note", max_length=1000)
+    status = v.choice("status", ("in_review", "resolved", "rejected"), required=True)
+    note = v.string("resolution_note", required=True, min_length=5, max_length=1500)
     v.finish()
-    if status == "resolved" and not note:
-        raise ApiError(
-            "reason_required",
-            "Add a resolution note before closing an issue.",
-            422,
-            fields={"resolution_note": "Describe how the issue was resolved."},
-        )
-    issue.status = status
-    if status == "resolved":
-        issue.resolution_note = note
-        issue.resolved_by_id = admin.id
-        issue.resolved_at = utcnow()
-    else:
-        issue.resolution_note = note or issue.resolution_note
-        issue.resolved_at = None
-        issue.resolved_by_id = None
-    dispatch.audit(
-        admin.id,
-        "issue.resolved" if status == "resolved" else "issue.updated",
-        "issue",
-        issue.id,
-        f"Issue #{issue.id} set to {status}.",
+    row.status = status
+    row.resolution_note = note
+    if status in ("resolved", "rejected"):
+        row.resolved_by_id = user.id
+        row.resolved_at = domain.utcnow()
+    audit(
+        "issue.reviewed",
+        "issue_report",
+        row.id,
+        actor=user,
+        summary=f"Issue #{row.id} {status}",
         reason=note,
     )
-    if issue.reporter_id:
-        dispatch.notify(
-            issue.reporter_id,
-            "issue_updated",
-            f"Issue update: {status.replace('_', ' ')}",
-            note or "An administrator updated your reported issue.",
-            f"/customer/requests/{issue.request_id}" if issue.request_id else None,
-        )
     db.session.commit()
-    return jsonify(
-        {
-            "data": {
-                **serialize_issue(issue, include_contacts=True),
-                "updated_at": iso(issue.updated_at),
-            }
-        }
-    )
+    return jsonify({"data": serialize_issue(row)})

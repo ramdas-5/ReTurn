@@ -23,7 +23,7 @@ const CHECKS = [
   {
     icon: Clock3,
     title: "Pickup windows",
-    body: "Every stop must fit inside the customer's stated collection window — no planned lateness.",
+    body: "Every stop must fit inside the consumer's stated collection window — no planned lateness.",
   },
   {
     icon: CalendarClock,
@@ -55,7 +55,7 @@ const CHECKS = [
 const PROCESS = [
   {
     title: "Create",
-    body: "A customer submits a product return to its authorised hub, or a parcel to a recipient's own address.",
+    body: "A consumer submits a product return to an authorised hub, or a parcel to a recipient's own address.",
     icon: PackageCheck,
   },
   {
@@ -65,12 +65,12 @@ const PROCESS = [
   },
   {
     title: "Execute",
-    body: "A verified partner accepts the batch, follows the ordered stops and updates each parcel separately.",
+    body: "An assigned, verified driver follows the ordered stops and updates each parcel separately.",
     icon: Truck,
   },
   {
     title: "Track",
-    body: "Customers see their own parcel-level timeline. Admins see estimated benefit and the full audit trail.",
+    body: "Consumers see their own parcel-level timeline. Managers and admins see the plan, proof and audit trail.",
     icon: CheckCircle2,
   },
 ];
@@ -136,7 +136,7 @@ export default async function LandingPage() {
             </div>
             <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-white/55">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-lime" aria-hidden /> Verified partners only
+                <ShieldCheck size={14} className="text-lime" aria-hidden /> Verified drivers only
               </span>
               <span className="inline-flex items-center gap-1.5">
                 <Route size={14} className="text-lime" aria-hidden /> Explainable, rule-based matching
@@ -241,8 +241,8 @@ export default async function LandingPage() {
           <p className="eyebrow">The honest workflow</p>
           <h2 className="mt-2 text-[32px] font-bold sm:text-[38px]">Create → coordinate → execute → track</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
-            No magic dispatch, no fabricated live tracking. A real coordinator reviews feasibility and a verified partner
-            executes each stop.
+            No magic dispatch, no fabricated live tracking. A real manager reviews feasibility and an assigned verified driver
+            executes each stop with proof.
           </p>
         </div>
         <div className="relative mt-10 grid gap-4 md:grid-cols-4">
@@ -299,11 +299,12 @@ export default async function LandingPage() {
       </section>
 
       <section className="container-page py-16">
-        <div className="grid gap-5 md:grid-cols-3">
+        <div className="grid gap-5 md:grid-cols-2 lg:grid-cols-4">
           {[
-            { title: "Customers", body: "Create a return or parcel, follow a parcel-level timeline, cancel while allowed and report an issue.", icon: PackageCheck },
-            { title: "Delivery partners", body: "Maintain vehicle capacity and availability, accept a feasible batch and execute ordered stops.", icon: Truck },
-            { title: "Administrators", body: "Run explainable matching, verify partners, dispatch batches and review estimated impact.", icon: ShieldCheck },
+            { title: "Consumers", body: "Send a parcel or return a product, follow a parcel-level timeline, cancel while allowed and report an issue.", icon: PackageCheck },
+            { title: "Drivers", body: "Manage duty and vehicle capacity, accept assigned work and complete every stop with proof.", icon: Truck },
+            { title: "Managers", body: "Review orders, plan batches, approve explainable route matches and verify delivery proof.", icon: Route },
+            { title: "Administrators", body: "Provision accounts, manage areas and fleet, audit proof and tune matching rules platform-wide.", icon: ShieldCheck },
           ].map((role) => (
             <div key={role.title} className="card card-pad">
               <role.icon size={20} className="text-accent" aria-hidden />

@@ -3,44 +3,48 @@
 import {
   AlertTriangle,
   BarChart3,
+  Building2,
   ClipboardList,
+  Gauge,
   History,
   LayoutDashboard,
   Map,
+  MapPin,
   Package,
   Route,
   Settings,
   ShieldCheck,
   Truck,
-  Users,
   UserRound,
+  Users,
+  Warehouse,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 import { cn } from "@/lib/cn";
 
-export type NavItem = {
-  href: string;
-  label: string;
-  icon: string;
-  exact?: boolean;
-};
+export type NavItem = { href: string; label: string; icon: string; exact?: boolean };
 
 const ICONS: Record<string, React.ComponentType<{ size?: number; strokeWidth?: number; "aria-hidden"?: boolean }>> = {
   dashboard: LayoutDashboard,
-  requests: ClipboardList,
+  orders: ClipboardList,
   history: History,
   settings: Settings,
   batches: Package,
   route: Route,
   profile: UserRound,
   customers: Users,
-  partners: ShieldCheck,
+  users: Users,
   issues: AlertTriangle,
   analytics: BarChart3,
   monitor: Map,
   truck: Truck,
+  duty: Gauge,
+  areas: MapPin,
+  business: Building2,
+  fleet: Warehouse,
+  audit: ShieldCheck,
 };
 
 function useIsActive() {
@@ -52,7 +56,7 @@ function useIsActive() {
 export function SidebarNav({ items }: { items: NavItem[] }) {
   const isActive = useIsActive();
   return (
-    <nav aria-label="Primary" className="mt-6 space-y-1 px-3">
+    <nav aria-label="Primary" className="mt-5 space-y-1 overflow-y-auto px-3 pb-4">
       {items.map((item) => {
         const Icon = ICONS[item.icon] ?? LayoutDashboard;
         return (

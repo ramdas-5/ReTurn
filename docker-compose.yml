@@ -30,9 +30,27 @@ services:
       OSRM_BASE_URL: ${OSRM_BASE_URL:-https://router.project-osrm.org}
       ROUTING_TIMEOUT_SECONDS: ${ROUTING_TIMEOUT_SECONDS:-3}
       SEED_DEMO_DATA: ${SEED_DEMO_DATA:-true}
+      # Optional: create the first administrator when demo seeding is disabled.
+      BOOTSTRAP_ADMIN_EMAIL: ${BOOTSTRAP_ADMIN_EMAIL:-}
+      BOOTSTRAP_ADMIN_NAME: ${BOOTSTRAP_ADMIN_NAME:-ReTurn Administrator}
+      BOOTSTRAP_ADMIN_PASSWORD: ${BOOTSTRAP_ADMIN_PASSWORD:-}
+      MEDIA_BACKEND: ${MEDIA_BACKEND:-local}
+      MEDIA_LOCAL_DIR: /app/var/media
+    volumes:
+      - return_media:/app/var/media
     depends_on:
       db:
         condition: service_healthy
+    healthcheck:
+      # The image is python:slim (no curl); probe the real health endpoint so the
+      # frontend does not start until migrations are done and Flask accepts requests.
+      test:
+        - CMD-SHELL
+        - python -c "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/api/v1/health', timeout=3)"
+      interval: 5s
+      timeout: 5s
+      retries: 20
+      start_period: 30s
     ports:
       - "5000:5000"
 
@@ -48,9 +66,11 @@ services:
       FLASK_API_URL: http://backend:5000
       NODE_ENV: production
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     ports:
       - "3000:3000"
 
 volumes:
   return_pgdata:
+  return_media:

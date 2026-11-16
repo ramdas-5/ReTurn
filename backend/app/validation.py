@@ -27,6 +27,9 @@ class Validator:
     def _fail(self, key: str, message: str):
         self.errors.setdefault(key, message)
 
+    def fail(self, key: str, message: str):
+        self._fail(key, message)
+
     def string(
         self,
         key: str,

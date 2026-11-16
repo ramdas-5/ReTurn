@@ -15,6 +15,13 @@ if [ "${SEED_DEMO_DATA:-false}" = "true" ]; then
   fi
 fi
 
+# Create the first administrator when bootstrap credentials are provided.
+# The command is idempotent: it does nothing once an administrator exists.
+if [ -n "${BOOTSTRAP_ADMIN_EMAIL:-}" ]; then
+  echo "Ensuring the bootstrap administrator exists…"
+  flask --app wsgi bootstrap-admin
+fi
+
 # Render/Railway inject PORT; Docker Compose leaves it unset (5000).
 BIND_PORT="${PORT:-5000}"
 echo "Starting ReTurn API on 0.0.0.0:${BIND_PORT}…"

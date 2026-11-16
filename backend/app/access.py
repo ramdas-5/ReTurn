@@ -1,91 +1,121 @@
-"""Ownership and role-scoped access helpers (authorization lives in Flask)."""
+"""Ownership and scope checks. All authorization is enforced here, server-side."""
 from __future__ import annotations
 
-from .domain import ROLE_ADMIN, ROLE_PARTNER
+from .domain import ROLE_ADMIN, ROLE_CONSUMER, ROLE_DRIVER, ROLE_MANAGER, is_active_order
 from .errors import ApiError
-from .models import BatchRequest, DeliveryBatch, DeliveryRequest
+from .models import BatchOrder, DriverAssignment, Order
 
 
-def partner_user_id_for_request(request: DeliveryRequest) -> int | None:
-    link = (
-        BatchRequest.query.filter(
-            BatchRequest.request_id == request.id, BatchRequest.released_at.is_(None)
+def _service_area_rows(user):
+    profile = getattr(user, "manager_profile", None)
+    if profile is None:
+        return []
+    return [link.service_area for link in profile.service_areas if link.service_area is not None]
+
+
+def _area_match(service_area, area_name: str | None, lat, lng) -> bool:
+    if area_name and service_area.name.casefold() == area_name.casefold():
+        return True
+    if area_name and area_name.casefold() in (service_area.postal_codes or "").casefold():
+        return True
+    if lat is not None and lng is not None and service_area.center_latitude is not None:
+        from .services.routing import haversine_km
+
+        distance = haversine_km(
+            float(service_area.center_latitude),
+            float(service_area.center_longitude),
+            float(lat),
+            float(lng),
         )
-        .join(DeliveryBatch, DeliveryBatch.id == BatchRequest.batch_id)
-        .first()
+        if distance <= float(service_area.radius_km or 0):
+            return True
+    return False
+
+
+def manager_covers_order(user, order: Order) -> bool:
+    address = order.pickup_address
+    if address is None:
+        return False
+    return any(
+        _area_match(area, address.area, address.latitude, address.longitude)
+        for area in _service_area_rows(user)
     )
-    return link.batch.partner_id if link and link.batch else None
 
 
-def partner_has_history_with_request(user_id: int, request: DeliveryRequest) -> bool:
-    links = BatchRequest.query.filter(BatchRequest.request_id == request.id).all()
-    return any(link.batch and link.batch.partner_id == user_id for link in links)
+def manager_covers_point(user, area_name: str | None, lat, lng) -> bool:
+    return any(_area_match(area, area_name, lat, lng) for area in _service_area_rows(user))
 
 
-def can_access_request(user, request: DeliveryRequest) -> bool:
+def manager_covers_area_name(user, area_name: str | None) -> bool:
+    return any(_area_match(area, area_name, None, None) for area in _service_area_rows(user))
+
+
+def can_view_order(user, order: Order) -> bool:
     if user is None:
         return False
     if user.role == ROLE_ADMIN:
         return True
-    if request.customer_id == user.id:
+    if user.role == ROLE_CONSUMER:
+        return order.consumer_id == user.id
+    if user.role == ROLE_MANAGER:
+        return manager_covers_order(user, order)
+    if user.role == ROLE_DRIVER:
+        assignment = (
+            DriverAssignment.query.filter_by(order_id=order.id, driver_id=user.id)
+            .order_by(DriverAssignment.assigned_at.desc())
+            .first()
+        )
+        return assignment is not None
+    return False
+
+
+def assert_order_access(user, order: Order):
+    if not can_view_order(user, order):
+        raise ApiError("forbidden", "You do not have access to that order.", 403)
+
+
+def assert_consumer_owns(user, order: Order):
+    if user is None or order.consumer_id != user.id:
+        raise ApiError("forbidden", "You do not have access to that order.", 403)
+
+
+def can_view_batch(user, batch) -> bool:
+    if user is None:
+        return False
+    if user.role == ROLE_ADMIN:
         return True
-    if user.role == ROLE_PARTNER:
-        return (
-            partner_user_id_for_request(request) == user.id
-            or partner_has_history_with_request(user.id, request)
+    if user.role == ROLE_DRIVER:
+        return batch.driver_id == user.id
+    if user.role == ROLE_MANAGER:
+        if batch.manager_id == user.id:
+            return True
+        order_ids = [
+            link.order
+            for link in BatchOrder.query.filter_by(batch_id=batch.id)
+            .filter(BatchOrder.removed_at.is_(None))
+            .all()
+        ]
+        return any(manager_covers_order(user, order) for order in order_ids if order)
+    if user.role == ROLE_CONSUMER:
+        return any(
+            link.order is not None and link.order.consumer_id == user.id
+            for link in BatchOrder.query.filter_by(batch_id=batch.id)
+            .filter(BatchOrder.removed_at.is_(None))
+            .all()
         )
     return False
 
 
-def assert_request_access(user, request: DeliveryRequest):
-    if not can_access_request(user, request):
-        raise ApiError("forbidden", "You do not have access to that request.", 403)
-
-
-def can_access_batch(user, batch: DeliveryBatch) -> bool:
-    if user is None:
-        return False
-    if user.role == ROLE_ADMIN:
-        return True
-    if user.role == ROLE_PARTNER:
-        if batch.partner_id == user.id:
-            return True
-        if batch.status == "proposed":
-            from .services.matching import partner_eligible_for_batch
-
-            eligible, _ = partner_eligible_for_batch(batch, user.partner_profile)
-            return eligible
-        return False
-    return any(
-        link.request.customer_id == user.id
-        for link in batch.request_links
-        if link.released_at is None
-    )
-
-
-def assert_batch_access(user, batch: DeliveryBatch):
-    if not can_access_batch(user, batch):
+def assert_batch_access(user, batch):
+    if not can_view_batch(user, batch):
         raise ApiError("forbidden", "You do not have access to that batch.", 403)
 
 
-def batch_contacts_allowed(user, batch: DeliveryBatch) -> bool:
-    if user is None:
-        return False
-    if user.role == ROLE_ADMIN:
-        return True
-    if user.role == ROLE_PARTNER:
-        return batch.partner_id == user.id and batch.status in {
-            "accepted",
-            "in_progress",
-            "completed",
-        }
-    return False
-
-
-def customer_request_ids(user_id: int) -> list[int]:
-    return [
-        row[0]
-        for row in DeliveryRequest.query.with_entities(DeliveryRequest.id)
-        .filter(DeliveryRequest.customer_id == user_id)
-        .all()
-    ]
+def consumer_can_cancel(order: Order) -> bool:
+    return is_active_order(order.status) and order.status not in {
+        "picked_up",
+        "in_transit",
+        "out_for_delivery",
+        "delivery_proof_pending",
+        "return_in_progress",
+    }

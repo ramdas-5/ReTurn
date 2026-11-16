@@ -1,127 +1,158 @@
-# ReTurn architecture
+# ReTurn architecture (v2)
 
 ## Runtime topology
 
 ```text
 Browser
-  │  same-origin fetch, HttpOnly session cookie + CSRF header
+  │ same-origin fetch; HttpOnly rt_session + rt_csrf cookies
   ▼
-Next.js 15 App Router (server components + client components)
-  │  /api/v1/* rewrite (FLASK_API_URL, server-only)
-  │  server components fetch API_INTERNAL_URL and forward the user cookie
-  ▼
-Flask 3 /api/v1  ── SQLAlchemy ── PostgreSQL (Alembic-managed)
-  │
-  ├─ rule-based matching + insertion heuristic
-  ├─ OSRM table/route (short timeout) → labelled deterministic estimate on failure
-  └─ server-side sessions, CSRF, RBAC, rate limits, transactional dispatch
+Next.js 15 App Router
+  ├─ server layouts call requireUser(role) and forward cookies to Flask
+  └─ /api/v1/* rewrite (FLASK_API_URL, server-only)
+        │
+        ▼
+Flask 3 /api/v1
+  ├─ auth, RBAC, service-area scoping, CSRF, rate limits
+  ├─ orders, returns, availability and private media
+  ├─ driver duty, route execution and proof capture
+  ├─ manager dispatch, batches, route-aware matching
+  ├─ admin accounts, fleet, areas, configuration, audit, analytics
+  └─ SQLAlchemy 2 + Alembic
+        │
+        ▼
+PostgreSQL 16+
 ```
 
-Leaflet is imported only inside a `"use client"` component in a browser effect. Server components never touch `window` or the map library.
+Leaflet is imported only in a client component. Server components never touch `window`.
+
+## Frontend structure
+
+```text
+src/app/
+  auth/            login, register, forgot, reset, activate
+  consumer/        dashboard, orders, parcel/return creation, tracking, support, settings
+  driver/          dashboard, assignments, batches, duty, vehicle, issues, notifications
+  manager/         dashboard, order queue, matching, batches, drivers, live, proofs, issues, reports
+  admin/           dashboard, analytics, operations, orders, batches, accounts, fleet, areas, config, audit, settings
+src/components/    shell, nav, status, timeline, maps, order form, role action panels
+src/lib/           API client, server cookie fetch, types, format, roles
+```
+
+Role layouts are server components using `requireUser(role)`. This is a navigation guard; Flask enforces authorization for every endpoint.
 
 ## Backend modules
 
 | Module | Responsibility |
 |---|---|
-| `app/__init__.py` | factory, blueprints, security pipeline, headers, cache prevention |
-| `app/config.py` | environment config, matching defaults, sustainability factors |
-| `app/models.py` | relational schema, indexes, partial unique reservation index |
-| `app/domain.py` | status vocabularies, legal parcel transitions, codes |
-| `app/security.py` | Argon2id, sessions, CSRF, role decorators, rate limiter |
-| `app/access.py` | request/batch ownership and contact boundaries |
-| `app/serializers.py` | role-aware JSON, no cross-customer leakage |
-| `app/api/*` | auth, requests, matching, batches, parcels, partners, customers, issues, notifications, analytics, admin |
-| `app/services/matching.py` | feasibility simulation, insertion search, explanations, savings |
-| `app/services/routing.py` | OSRM matrix/geometry, estimated fallback, labels |
-| `app/services/dispatch.py` | commit/offer/accept/decline/reassign/cancel/start/parcel events, audits, notifications |
-| `app/services/analytics.py` | KPIs and estimated impact with methodology |
-| `app/services/seed.py` | deterministic fictional scenario |
+| `app/__init__.py` | factory, blueprint registration, proxy and security headers |
+| `app/domain.py` | roles, statuses, transitions, permission catalog, labels, rejection codes |
+| `app/models.py` | full schema: accounts, profiles, areas, vehicles, duty, orders, batches, routes, proofs, issues, settings, audit |
+| `app/security.py` | Argon2id, sessions, CSRF, role/permission decorators, rate limits |
+| `app/access.py` | order/batch visibility, service-area and contact boundaries |
+| `app/serializers.py` | response contracts for every role |
+| `app/api/auth.py` | registration, login, logout, password, reset, activation |
+| `app/api/accounts.py` | self profile, addresses, business profile, staff provisioning, verification |
+| `app/api/orders.py` | order intake, availability, tracking, cancellation, images |
+| `app/api/returns.py` | consumer return creation, list and detail |
+| `app/api/media.py` | signed private media access |
+| `app/api/consumer.py` | consumer dashboard summary |
+| `app/api/driver.py` | duty, location, assignments, pickup/delivery proof, exceptions, batches |
+| `app/api/manager.py` | review, assignment, batches, route matching, proofs, exceptions |
+| `app/api/admin.py` | global reporting, accounts, fleet, areas, matching config, settings, audit |
+| `app/api/issues.py` | consumer/driver reports and manager/admin resolution |
+| `app/api/notifications.py` | in-app notification feed |
+| `app/api/health.py` | database-backed health check |
+| `app/services/orders.py` | create order, status transitions, history |
+| `app/services/dispatch.py` | eligibility, assignment, batch creation, route rebuild, capacity snapshots |
+| `app/services/route_planner.py` | route planning, insertion, stored config overrides |
+| `app/services/matching.py` | active-route suggestion engine and decisions |
+| `app/services/routing.py` | OSRM and labelled fallback |
+| `app/services/proofs.py` | capture validation (time, accuracy, distance) |
+| `app/services/storage.py` | private local/S3 media, signed URLs |
+| `app/services/seed.py` | fictional demo scenario |
+| `app/services/analytics.py` | global counts and modelled sustainability estimates |
 
-## Data model
+## Data model (principal tables)
 
 ```text
-users ──1:1── partner_profiles
-  │
-  ├──1:N── delivery_requests ──1:1── parcels ──1:N── tracking_events
-  │             │  │
-  │             │  ├──1:1── return_details (authorised hub, reference)
-  │             │  └──1:1── recipient_details (recipient contact)
-  │             │
-  │             └──N:M via batch_requests (active reservation + released history)
-  │                        │
-  │                        └── delivery_batches ──1:N── batch_stops (ordered, load snapshot)
-  │                              ├──1:N── batch_assignments (offer/accept/decline/reassign history)
-  │                              └──1:N── audit_events (through entity id)
-  ├──1:N── user_sessions
-  ├──1:N── notifications
-  └──1:N── issue_reports
+users ──1:1── consumer_profiles / driver_profiles / manager_profiles
+  ├── user_sessions, one_time_tokens, notifications, audit_logs
+  ├── saved_addresses
+  └── orders
+        ├── pickup_addresses, delivery_addresses, contacts, parcel_details, return_requests
+        ├── order_status_history
+        ├── parcel_images ── media_assets
+        ├── driver_assignments
+        ├── proof_media ── media_assets
+        ├── pickup_proofs, delivery_proofs
+        └── delivery_exceptions, issue_reports
 
-locations ── pickup/destination FKs on each request
-matching_runs ── full preview JSON (params, groups, rejections)
-audit_events ── actor, action, entity, reason, metadata
+service_areas ── manager_service_areas, driver_service_areas
+driver_profiles ── vehicles ── vehicle_capacity_profiles
+driver_profiles ── driver_duty_sessions ── driver_location_events
+
+delivery_batches ── batch_orders
+  ├── route_plans ── route_stops
+  ├── matching_suggestions
+  └── driver_assignments
+
+admin_settings, permissions, user_permissions
 ```
 
-Key constraints:
+Key database guarantees:
 
-- `UNIQUE(parcels.request_id)`, `UNIQUE(users.email)`, `UNIQUE(user_sessions.token_hash)`.
-- `UNIQUE(batch_stops.batch_id, sequence)`.
-- **Partial unique index** `uq_batch_requests_active_request ON batch_requests(request_id) WHERE released_at IS NULL` — the database, not application logic, guarantees one active batch per request.
-- Indexes on request status/window, owner+status, batch status, partner availability/verification, parcel status and notification read state.
+- unique email and session-token hash;
+- one active assignment per order, enforced in dispatch logic and constrained writes;
+- one active batch membership per order (`batch_orders.removed_at IS NULL`);
+- unique driver duty session per driver (`ended_at IS NULL`);
+- foreign keys and indexes on status, area, duty, route and audit lookups.
+
+## Dispatch lifecycle
+
+```text
+submitted → pending_review → awaiting_assignment → assigned
+          → pickup_scheduled → pickup_arrived → picked_up
+          → in_transit → out_for_delivery → delivery_proof_pending?
+          → delivered / returned | failed | cancelled
+```
+
+Transitions are validated in `domain.can_transition` and written only through `record_status`, which appends `order_status_history`. Delivery completion additionally requires a validated proof when configured.
 
 ## Matching flow
 
 ```text
-pending requests (status=pending_matching, no active reservation)
-  │
-  ├─ hard prefilter: pickup radius
-  ├─ build estimated/OSRM matrix
-  ├─ for each seed → for each candidate:
-  │     for each pickup insert position i:
-  │        for each drop-off position j > i:
-  │           simulate itinerary:
-  │             travel → wait → pickup window check → load capacity
-  │             → drop-off deadline → load release → service time
-  │           reject with a reason code if any hard rule fails
-  │     keep lowest-distance feasible insertion
-  ├─ group ≥ 2 → savings vs same-basis separate-trip baseline
-  │     reject if raw saving ≤ 0 or < configured minimum
-  └─ re-solve selected group with build_group() for the proposal payload
+manager scans approved orders
+  └─ for each driver visible to the manager:
+       eligibility (active, verified, duty live, area, vehicle, capacity)
+       active route must exist
+       pickup distance to route corridor ≤ max_pickup_radius_km
+       compute best pickup/delivery insertion into remaining stops
+       check precedence, windows, deadline, load after each stop, detour
+       persist feasible suggestion with score, reasons, blockers, capacity snapshot
+manager approves → engine revalidates → order assigned / active route extended
+manager rejects → suggestion closed with reason
 ```
 
-Commit calls `quote_selected_requests()` again, then locks the request rows with `SELECT … FOR UPDATE`, verifies statuses and reservations, recalculates the group, stores the batch/stops/reservation rows and commits once. Unique-index conflicts become a `409`.
+Administrator overrides in `admin_settings` key `matching.defaults` are merged over environment defaults by `route_planner.config()`.
 
-## Dispatch state machines
+## Authentication and CSRF
 
 ```text
-Batch:     proposed ──offer──▶ offered ──accept──▶ accepted ──start──▶ in_progress ──all terminal──▶ completed
-              │                  │                    │
-              │                  ├─decline──▶ declined (re-offerable)
-              └──── cancel ───────┴────────────▶ cancelled (releases requests)
-
-Request:   pending_matching ──commit──▶ batched ──accept──▶ assigned ──start──▶ in_progress ──delivered──▶ completed
-Parcel:    pending ─▶ assigned ─▶ partner_accepted ─▶ pickup_arrived ─▶ picked_up ─▶ in_transit ─▶ delivered
-                                                    └──────────────── failed (reason required → issue) ────────────┘
+GET /auth/csrf                      → rt_csrf cookie
+POST /auth/login + X-CSRF-Token     → session row + HttpOnly rt_session + rotated rt_csrf
+Mutating request                    → header == cookie == session.csrf_token
 ```
 
-## Authentication / CSRF sequence
+Sessions are server-side. Only the SHA-256 hash of the random token is stored. Server layouts forward the cookie header to Flask.
 
-```text
-Browser GET /api/v1/auth/csrf
-  → Flask sets rt_csrf (readable, SameSite=Lax)
-Browser POST /auth/login with X-CSRF-Token = cookie value
-  → Flask verifies double-submit, validates credentials
-  → creates session row (token hash + session CSRF token)
-  → sets HttpOnly rt_session + rotates rt_csrf cookie
-Browser mutating request with X-CSRF-Token
-  → header == rt_csrf cookie == session.csrf_token
-Server components forward rt_session from cookies() to Flask via API_INTERNAL_URL
-  → Flask resolves the identity and enforces ownership/RBAC
-```
+## Media
 
-## Frontend design/architecture
+- Uploads are validated by MIME type and magic bytes, with a size limit.
+- Files are private: never served from a static path.
+- `GET /api/v1/media/<id>?expires=…&signature=…` verifies an HMAC signature and authorization scope.
+- Driver proof images include capture time, coordinates, accuracy and distance from the stop.
+- Local storage is the development fallback; S3 is supported for durable deployment.
 
-- `/customer`, `/partner`, `/admin` layouts call `requireUser(role)`, which redirects to `/auth` or `/forbidden`. This is convenience only; Flask enforces every permission.
-- Sensitive data is fetched with `cache: "no-store"` per user and dynamic rendering; no role page is statically cached.
-- Server components compose page data. Client components own forms, dialogs, map, notifications and dispatch actions.
-- Notifications use TanStack Query; API calls use a typed client that bootstraps CSRF before unsafe methods.
-- Design tokens are CSS variables mirrored into Tailwind; the route-thread motif, pickup circles and drop-off squares are consistent across marketing, maps and timelines.
+## Notifications and audit
+
+Notifications are stored per user and polled by the client. Dispatch, proof review, exceptions, account status, verification, matching configuration and settings changes create append-only audit rows with actor, summary, reason and metadata.

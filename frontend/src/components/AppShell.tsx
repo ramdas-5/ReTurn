@@ -2,46 +2,70 @@ import Link from "next/link";
 import type { ReactNode } from "react";
 
 import { Brand } from "@/components/Brand";
-import { SidebarNav, MobileNav, type NavItem } from "@/components/AppNav";
+import { MobileNav, SidebarNav, type NavItem } from "@/components/AppNav";
 import { NotificationMenu, TopBarUser } from "@/components/TopBarActions";
 import type { AuthMe, Role } from "@/lib/types";
 
-const CUSTOMER_NAV: NavItem[] = [
-  { href: "/customer", label: "Overview", icon: "dashboard", exact: true },
-  { href: "/customer/requests", label: "My Requests", icon: "requests" },
-  { href: "/customer/history", label: "History", icon: "history" },
-  { href: "/customer/settings", label: "Profile & Settings", icon: "settings" },
-];
-
-const PARTNER_NAV: NavItem[] = [
-  { href: "/partner", label: "Overview", icon: "dashboard", exact: true },
-  { href: "/partner/batches", label: "Available Batches", icon: "batches" },
-  { href: "/partner#active-route", label: "Active Route", icon: "route" },
-  { href: "/partner/history", label: "Completed Work", icon: "history" },
-  { href: "/partner/profile", label: "Vehicle & Profile", icon: "profile" },
-];
-
-const ADMIN_NAV: NavItem[] = [
-  { href: "/admin", label: "Overview", icon: "dashboard", exact: true },
-  { href: "/admin/requests", label: "Requests", icon: "requests" },
-  { href: "/admin/batches", label: "Batches", icon: "batches" },
-  { href: "/admin/routes", label: "Route Monitor", icon: "monitor" },
-  { href: "/admin/customers", label: "Customers", icon: "customers" },
-  { href: "/admin/partners", label: "Partners", icon: "partners" },
-  { href: "/admin/issues", label: "Issues", icon: "issues" },
-  { href: "/admin/analytics", label: "Analytics", icon: "analytics" },
-];
-
-export const NAV_BY_ROLE: Record<Role, NavItem[]> = {
-  customer: CUSTOMER_NAV,
-  partner: PARTNER_NAV,
-  admin: ADMIN_NAV,
+const NAV: Record<Role, NavItem[]> = {
+  consumer: [
+    { href: "/consumer", label: "Overview", icon: "dashboard", exact: true },
+    { href: "/consumer/orders", label: "My orders", icon: "orders" },
+    { href: "/consumer/history", label: "History", icon: "history" },
+    { href: "/consumer/addresses", label: "Saved addresses", icon: "areas" },
+    { href: "/consumer/business", label: "Business profile", icon: "business" },
+    { href: "/consumer/support", label: "Support & issues", icon: "issues" },
+    { href: "/consumer/notifications", label: "Notifications", icon: "monitor" },
+    { href: "/consumer/settings", label: "Profile & settings", icon: "settings" },
+  ],
+  driver: [
+    { href: "/driver", label: "Overview", icon: "dashboard", exact: true },
+    { href: "/driver/assignments", label: "Assigned orders", icon: "orders" },
+    { href: "/driver/batches", label: "Assigned batches", icon: "batches" },
+    { href: "/driver/duty", label: "Duty & availability", icon: "duty" },
+    { href: "/driver/history", label: "Delivery history", icon: "history" },
+    { href: "/driver/vehicle", label: "Vehicle profile", icon: "profile" },
+    { href: "/driver/issues", label: "Report an issue", icon: "issues" },
+    { href: "/driver/notifications", label: "Notifications", icon: "monitor" },
+  ],
+  manager: [
+    { href: "/manager", label: "Overview", icon: "dashboard", exact: true },
+    { href: "/manager/orders", label: "Order management", icon: "orders" },
+    { href: "/manager/assignments", label: "Pending assignments", icon: "truck" },
+    { href: "/manager/matching", label: "Smart matching", icon: "route" },
+    { href: "/manager/batches", label: "Batches", icon: "batches" },
+    { href: "/manager/drivers", label: "Drivers", icon: "customers" },
+    { href: "/manager/routes", label: "Route management", icon: "route" },
+    { href: "/manager/progress", label: "Delivery progress", icon: "monitor" },
+    { href: "/manager/live", label: "Live tracking", icon: "monitor" },
+    { href: "/manager/proofs", label: "Proof verification", icon: "audit" },
+    { href: "/manager/issues", label: "Delivery issues", icon: "issues" },
+    { href: "/manager/analytics", label: "Reports", icon: "analytics" },
+  ],
+  admin: [
+    { href: "/admin", label: "Overview", icon: "dashboard", exact: true },
+    { href: "/admin/analytics", label: "Analytics", icon: "analytics" },
+    { href: "/admin/operations", label: "Live operations", icon: "monitor" },
+    { href: "/admin/orders", label: "All orders", icon: "orders" },
+    { href: "/admin/batches", label: "All batches", icon: "batches" },
+    { href: "/admin/consumers", label: "Consumers", icon: "customers" },
+    { href: "/admin/businesses", label: "Businesses", icon: "business" },
+    { href: "/admin/managers", label: "Managers", icon: "users" },
+    { href: "/admin/drivers", label: "Drivers", icon: "truck" },
+    { href: "/admin/vehicles", label: "Vehicles", icon: "fleet" },
+    { href: "/admin/service-areas", label: "Service areas", icon: "areas" },
+    { href: "/admin/matching", label: "Matching config", icon: "route" },
+    { href: "/admin/proofs", label: "Proof audit", icon: "audit" },
+    { href: "/admin/audit", label: "Audit logs", icon: "audit" },
+    { href: "/admin/settings", label: "Platform settings", icon: "settings" },
+    { href: "/admin/accounts/new", label: "Create account", icon: "users" },
+  ],
 };
 
 const ROLE_LABEL: Record<Role, string> = {
-  customer: "Customer workspace",
-  partner: "Partner route desk",
-  admin: "Dispatch control room",
+  consumer: "Consumer workspace",
+  driver: "Driver field app",
+  manager: "Operations desk",
+  admin: "Platform control",
 };
 
 export default function AppShell({
@@ -53,46 +77,43 @@ export default function AppShell({
   role: Role;
   children: ReactNode;
 }) {
-  const items = NAV_BY_ROLE[role];
-  const home = role === "admin" ? "/admin" : role === "partner" ? "/partner" : "/customer";
+  const items = NAV[role];
+  const home = `/${role}`;
 
   return (
     <div className="min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-ink px-1 pb-5 pt-6 text-white lg:flex">
+      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-ink pb-5 pt-6 text-white lg:flex">
         <div className="px-4">
           <Brand href={home} invert />
-          <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-white/45">{ROLE_LABEL[role]}</p>
+          <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-white/45">
+            {ROLE_LABEL[role]}
+          </p>
         </div>
-        {role === "customer" ? (
-          <div className="mt-5 space-y-2 px-3">
+        {role === "consumer" ? (
+          <div className="mt-4 space-y-2 px-3">
             <Link
-              href="/customer/returns/new"
+              href="/consumer/parcels/new"
               className="flex min-h-[42px] items-center justify-center rounded-control bg-lime px-3 text-[13px] font-semibold text-ink transition hover:brightness-95"
             >
-              Return a product
+              Send a parcel
             </Link>
             <Link
-              href="/customer/parcels/new"
+              href="/consumer/returns/new"
               className="flex min-h-[42px] items-center justify-center rounded-control border border-white/20 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
             >
-              Send a parcel
+              Return a product
             </Link>
           </div>
         ) : null}
         <SidebarNav items={items} />
-        <div className="mt-auto px-4">
+        <div className="mt-auto px-4 pt-3">
           <div className="rounded-card border border-white/10 bg-white/[0.04] p-3">
-            <p className="truncate text-[13px] font-semibold">{me.user.name}</p>
+            <p className="truncate text-[13px] font-semibold">{me.user.full_name}</p>
             <p className="truncate text-[11px] text-white/55">{me.user.email}</p>
-            {me.partner_profile ? (
-              <p className="mt-2 text-[11px] text-white/55">
-                {me.partner_profile.company_name} ·{" "}
-                <span className="capitalize">{me.partner_profile.verification_status}</span>
-              </p>
-            ) : null}
+            <p className="mt-1 text-[10px] uppercase tracking-wide text-lime/70">{role}</p>
           </div>
           <p className="mt-3 px-1 text-[10px] leading-4 text-white/35">
-            ReTurn coordinates requests; it does not operate courier vehicles.
+            ReTurn coordinates feasible shared routes. It does not operate the vehicles.
           </p>
         </div>
       </aside>
@@ -103,13 +124,13 @@ export default function AppShell({
             <Brand href={home} compact />
           </div>
           <div className="ml-auto flex items-center gap-1 sm:gap-2">
-            {role === "customer" ? (
+            {role === "consumer" ? (
               <div className="mr-1 hidden items-center gap-2 sm:flex">
-                <Link href="/customer/returns/new" className="btn btn-primary btn-sm">
-                  New return
+                <Link href="/consumer/parcels/new" className="btn btn-primary btn-sm">
+                  New parcel
                 </Link>
-                <Link href="/customer/parcels/new" className="btn btn-secondary btn-sm">
-                  Send parcel
+                <Link href="/consumer/returns/new" className="btn btn-secondary btn-sm">
+                  New return
                 </Link>
               </div>
             ) : null}

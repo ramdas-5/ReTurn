@@ -1,8 +1,6 @@
 """Application factory for the ReTurn Flask API."""
 from __future__ import annotations
 
-import os
-
 from flask import Flask, jsonify
 
 from .config import Config
@@ -59,38 +57,40 @@ def create_app(config_object: type = Config, **overrides) -> Flask:
             response.headers["Access-Control-Allow-Methods"] = "GET, POST, PATCH, DELETE, OPTIONS"
         return response
 
-    from .api.admin import bp as admin_bp
-    from .api.analytics import bp as analytics_bp
+    from .api.accounts import bp as accounts_bp
     from .api.auth import bp as auth_bp
-    from .api.batches import bp as batches_bp
-    from .api.customers import bp as customers_bp
+    from .api.consumer import bp as consumer_bp
+    from .api.driver import bp as driver_bp
+    from .api.admin import bp as admin_bp
     from .api.health import bp as health_bp
     from .api.issues import bp as issues_bp
-    from .api.locations import bp as locations_bp
-    from .api.matching import bp as matching_bp
+    from .api.manager import bp as manager_bp
+    from .api.media import bp as media_bp
     from .api.notifications import bp as notifications_bp
-    from .api.parcels import bp as parcels_bp
-    from .api.partners import bp as partners_bp
-    from .api.requests import bp as requests_bp
+    from .api.orders import bp as orders_bp
+    from .api.returns import bp as returns_bp
 
     for blueprint in (
         health_bp,
         auth_bp,
-        requests_bp,
-        matching_bp,
-        batches_bp,
-        parcels_bp,
-        partners_bp,
-        customers_bp,
-        issues_bp,
+        accounts_bp,
+        orders_bp,
+        returns_bp,
+        media_bp,
         notifications_bp,
-        analytics_bp,
+        consumer_bp,
+        driver_bp,
+        manager_bp,
         admin_bp,
-        locations_bp,
+        issues_bp,
     ):
         app.register_blueprint(blueprint)
 
     register_error_handlers(app)
+
+    from .cli import register_cli
+
+    register_cli(app)
 
     @app.get("/")
     def index():
@@ -98,18 +98,11 @@ def create_app(config_object: type = Config, **overrides) -> Flask:
             {
                 "data": {
                     "name": "ReTurn",
-                    "description": "Smart Reverse Delivery & Shared Logistics Platform",
+                    "tagline": "One Route. Multiple Deliveries. Less Waste.",
                     "api": "/api/v1/health",
                 }
             }
         )
-
-    @app.cli.command("seed")
-    def seed_command():  # pragma: no cover - exercised via manage.py
-        from .services.seed import seed_demo_data
-
-        summary = seed_demo_data(reset=True)
-        print(summary)
 
     return app
 
@@ -118,6 +111,3 @@ def request_origin() -> str | None:
     from flask import request
 
     return request.headers.get("Origin")
-
-
-__all__ = ["create_app", "ApiError", "os"]

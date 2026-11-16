@@ -1,18 +1,26 @@
 "use client";
 
-/** Browser API client. Uses the same-origin /api/v1 rewrite to Flask. */
+/** Browser API client. Same-origin `/api/v1` is proxied to Flask. */
 
 export class ApiError extends Error {
   code: string;
   status: number;
   fields: Record<string, string>;
+  details: Record<string, unknown>;
 
-  constructor(message: string, code = "request_failed", status = 0, fields: Record<string, string> = {}) {
+  constructor(
+    message: string,
+    code = "request_failed",
+    status = 0,
+    fields: Record<string, string> = {},
+    details: Record<string, unknown> = {},
+  ) {
     super(message);
     this.name = "ApiError";
     this.code = code;
     this.status = status;
     this.fields = fields;
+    this.details = details;
   }
 }
 
@@ -43,30 +51,25 @@ export async function ensureCsrfToken(): Promise<string> {
   return csrfRequest;
 }
 
-type Options = {
-  method?: "GET" | "POST" | "PATCH" | "DELETE";
-  body?: unknown;
-  signal?: AbortSignal;
-};
+type Method = "GET" | "POST" | "PATCH" | "PUT" | "DELETE";
+type Options = { method?: Method; body?: unknown; signal?: AbortSignal; form?: FormData };
 
 async function requestRaw(path: string, options: Options = {}) {
   const method = options.method ?? "GET";
   const headers: Record<string, string> = { Accept: "application/json" };
   if (options.body !== undefined) headers["Content-Type"] = "application/json";
-  if (method !== "GET") {
-    headers["X-CSRF-Token"] = await ensureCsrfToken();
-  }
+  if (method !== "GET") headers["X-CSRF-Token"] = await ensureCsrfToken();
   let response: Response;
   try {
     response = await fetch(`/api/v1${path}`, {
       method,
       headers,
-      body: options.body !== undefined ? JSON.stringify(options.body) : undefined,
+      body: options.form ?? (options.body !== undefined ? JSON.stringify(options.body) : undefined),
       credentials: "same-origin",
       cache: "no-store",
       signal: options.signal,
     });
-  } catch (error) {
+  } catch {
     throw new ApiError(
       "The ReTurn API could not be reached. Check that the Flask service is running.",
       "network_error",
@@ -86,29 +89,39 @@ async function requestRaw(path: string, options: Options = {}) {
       error.code ?? "request_failed",
       response.status,
       error.fields ?? {},
+      error.details ?? {},
     );
   }
   return payload;
 }
 
 export async function apiGet<T>(path: string): Promise<T> {
-  const payload = await requestRaw(path);
-  return payload?.data as T;
+  return (await requestRaw(path))?.data as T;
 }
 
 export async function apiGetList<T>(
   path: string,
-): Promise<{ data: T[]; meta?: { unread_count?: number; total?: number } }> {
+): Promise<{ data: T[]; meta?: Record<string, any> }> {
   const payload = await requestRaw(path);
   return { data: (payload?.data ?? []) as T[], meta: payload?.meta };
 }
 
 export async function apiPost<T>(path: string, body: unknown = {}): Promise<T> {
-  const payload = await requestRaw(path, { method: "POST", body });
-  return payload?.data as T;
+  return (await requestRaw(path, { method: "POST", body }))?.data as T;
+}
+
+export async function apiPut<T>(path: string, body: unknown = {}): Promise<T> {
+  return (await requestRaw(path, { method: "PUT", body }))?.data as T;
 }
 
 export async function apiPatch<T>(path: string, body: unknown = {}): Promise<T> {
-  const payload = await requestRaw(path, { method: "PATCH", body });
-  return payload?.data as T;
+  return (await requestRaw(path, { method: "PATCH", body }))?.data as T;
+}
+
+export async function apiDelete<T>(path: string): Promise<T> {
+  return (await requestRaw(path, { method: "DELETE" }))?.data as T;
+}
+
+export async function apiUpload<T>(path: string, form: FormData): Promise<T> {
+  return (await requestRaw(path, { method: "POST", form }))?.data as T;
 }

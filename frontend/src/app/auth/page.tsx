@@ -2,7 +2,7 @@ import { ArrowLeft, CheckCircle2, Route, ShieldCheck, Truck } from "lucide-react
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
-import { Brand, RouteMark } from "@/components/Brand";
+import { Brand } from "@/components/Brand";
 import AuthForm from "@/components/forms/AuthForm";
 import { getMe } from "@/lib/server";
 import { homeFor } from "@/lib/roles";
@@ -14,7 +14,9 @@ export default async function AuthPage({
 }: {
   searchParams: Promise<{ next?: string }>;
 }) {
-  const me = await getMe();
+  // Render the sign-in form even while the API is unreachable (cold start).
+  // A failed sign-in attempt surfaces the connection error inside the form.
+  const me = await getMe().catch(() => null);
   if (me) redirect(homeFor(me.user.role));
   const { next } = await searchParams;
 
@@ -29,55 +31,43 @@ export default async function AuthPage({
             One route. Multiple deliveries. Less waste.
           </h1>
           <p className="mt-4 max-w-md text-sm leading-6 text-white/65">
-            A product return and an ordinary parcel are different journeys. ReTurn only shares the road when the
-            windows, capacity, handling and destinations genuinely allow it.
+            Send a parcel or return a product. A real operations team reviews every order, verifies capacity and
+            assigns a driver — no invented tracking or fake instant dispatch.
           </p>
           <div className="mt-8 max-w-md rounded-card border border-white/12 bg-white/[0.04] p-5">
-            <RouteMark className="h-9 w-9 text-lime" />
-            <ul className="mt-4 space-y-3 text-[13px] leading-5 text-white/70">
-              <li className="flex gap-2">
-                <CheckCircle2 size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Return hubs stay authorised; recipient addresses stay theirs.
-              </li>
-              <li className="flex gap-2">
-                <ShieldCheck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Verified partners accept feasible batches, not nearby guesses.
-              </li>
-              <li className="flex gap-2">
-                <Truck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Each parcel has its own tracking, even inside one route.
-              </li>
-              <li className="flex gap-2">
-                <Route size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Savings are labelled estimates, with visible assumptions.
-              </li>
+            <ul className="space-y-3 text-[13px] leading-5 text-white/70">
+              <li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Return destinations stay authorised.</li>
+              <li className="flex gap-2"><ShieldCheck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Drivers and vehicles are manager-verified.</li>
+              <li className="flex gap-2"><Truck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Deliveries complete only with captured proof.</li>
+              <li className="flex gap-2"><Route size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Shared routes require genuine feasibility.</li>
             </ul>
           </div>
         </div>
         <p className="text-[11px] leading-4 text-white/35">
-          Fictional demo data. Map data © OpenStreetMap contributors. Not a live courier fleet.
+          Demo data is fictional. Map data © OpenStreetMap contributors. Savings are modelled estimates.
         </p>
       </section>
 
       <section className="flex flex-col px-5 py-8 sm:px-10">
         <div className="flex items-center justify-between gap-4">
-          <div className="lg:hidden">
-            <Brand />
-          </div>
+          <div className="lg:hidden"><Brand /></div>
           <Link href="/" className="btn btn-ghost btn-sm ml-auto">
             <ArrowLeft size={15} aria-hidden /> Back to landing
           </Link>
         </div>
         <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col justify-center py-10">
           <p className="eyebrow">ReTurn account</p>
-          <h2 id="auth-heading" className="mt-2 text-[30px] font-bold leading-tight">
-            Welcome back to a calmer route
-          </h2>
+          <h2 className="mt-2 text-[30px] font-bold leading-tight">Welcome to a calmer route</h2>
           <p className="mt-2 text-sm leading-6 text-muted">
-            Sign in, or create a customer or delivery-partner account. Partner accounts start pending administrator
-            verification.
+            Sign in, or create a consumer account to send parcels and returns.
           </p>
-          <div className="mt-6">
-            <AuthForm nextPath={next} />
+          <div className="mt-6"><AuthForm nextPath={next} /></div>
+          <div className="mt-4 flex items-center justify-between text-xs">
+            <Link href="/auth/forgot" className="link">Forgot password?</Link>
+            <Link href="/auth/activate" className="link">Activate account</Link>
           </div>
           <p className="mt-5 text-center text-[11px] leading-5 text-muted">
-            Sessions use a secure HttpOnly cookie with CSRF protection. Private data is never cached publicly.
+            Sessions use a secure HttpOnly cookie with CSRF protection.
           </p>
         </div>
       </section>

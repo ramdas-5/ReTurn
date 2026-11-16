@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40" role="img" aria-label="ReTurn">
+  <rect width="40" height="40" rx="11" fill="#087c60" />
+  <path
+    d="M10 27 C 15 27, 14 18, 20 18 S 25 12, 30 12"
+    fill="none"
+    stroke="#cbf08c"
+    stroke-width="2.4"
+    stroke-linecap="round"
+  />
+  <circle cx="10" cy="27" r="4" fill="#cbf08c" />
+  <rect x="26" y="8" width="8" height="8" rx="2.2" fill="#cbf08c" />
+</svg>

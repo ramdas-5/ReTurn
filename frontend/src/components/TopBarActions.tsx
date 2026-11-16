@@ -6,7 +6,7 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-import { apiGetList, apiPatch, apiPost } from "@/lib/api";
+import { apiGetList, apiPost } from "@/lib/api";
 import { initials, relativeTime } from "@/lib/format";
 import type { ApiUser, AppNotification } from "@/lib/types";
 
@@ -18,7 +18,6 @@ export function NotificationMenu() {
     queryKey: ["notifications"],
     queryFn: () => apiGetList<AppNotification>("/notifications?limit=10"),
     refetchInterval: 60_000,
-    enabled: true,
   });
   const markAll = useMutation({
     mutationFn: () => apiPost<{ marked_read: number }>("/notifications/read-all"),
@@ -77,7 +76,7 @@ export function NotificationMenu() {
                   href={item.link ?? "/"}
                   onClick={() => {
                     if (!item.read_at) {
-                      void apiPatch(`/notifications/${item.id}`, {}).then(() =>
+                      void apiPost(`/notifications/${item.id}/read`).then(() =>
                         queryClient.invalidateQueries({ queryKey: ["notifications"] }),
                       );
                     }
@@ -86,11 +85,12 @@ export function NotificationMenu() {
                   className="block border-b px-4 py-3 last:border-0 hover:bg-surface-muted"
                 >
                   <div className="flex items-start gap-2">
-                    {!item.read_at ? (
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-accent" aria-label="Unread" />
-                    ) : (
-                      <span className="mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full bg-transparent" />
-                    )}
+                    <span
+                      className={`mt-1.5 h-1.5 w-1.5 shrink-0 rounded-full ${
+                        item.read_at ? "bg-transparent" : "bg-accent"
+                      }`}
+                      aria-label={item.read_at ? undefined : "Unread"}
+                    />
                     <div>
                       <p className="text-[13px] font-medium leading-5">{item.title}</p>
                       <p className="mt-0.5 text-xs leading-5 text-muted">{item.body}</p>
@@ -127,14 +127,14 @@ export function TopBarUser({ user }: { user: ApiUser }) {
   return (
     <div className="flex items-center gap-2">
       <div className="hidden text-right sm:block">
-        <p className="text-[13px] font-semibold leading-4">{user.name}</p>
+        <p className="text-[13px] font-semibold leading-4">{user.full_name}</p>
         <p className="text-[11px] capitalize leading-4 text-muted">{user.role}</p>
       </div>
       <div
         className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-xs font-bold text-accent-strong"
         aria-hidden="true"
       >
-        {initials(user.name)}
+        {initials(user.full_name)}
       </div>
       <button
         type="button"

@@ -2,7 +2,7 @@
 
 import "leaflet/dist/leaflet.css";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
 
@@ -20,6 +20,29 @@ export type MapStop = {
 
 type Geometry = { type: string; coordinates: number[][] } | null;
 
+type LeafletApi = typeof import("leaflet");
+
+/**
+ * Leaflet is published as a UMD bundle with no ES `default` export. Depending on
+ * how the bundler wraps it, the API can arrive as the module namespace itself, as
+ * `module.default`, or as a nested namespace. Resolve whichever object actually
+ * exposes `map()` instead of assuming a single shape.
+ */
+function resolveLeaflet(module: unknown): LeafletApi | null {
+  const candidates: unknown[] = [module];
+  let current: unknown = module;
+  for (let depth = 0; depth < 3; depth += 1) {
+    const next = (current as { default?: unknown } | null | undefined)?.default;
+    if (!next || next === current) break;
+    candidates.push(next);
+    current = next;
+  }
+  for (const candidate of candidates) {
+    if (candidate && typeof (candidate as LeafletApi).map === "function") return candidate as LeafletApi;
+  }
+  return null;
+}
+
 export default function RouteMap({
   stops,
   geometry = null,
@@ -36,6 +59,7 @@ export default function RouteMap({
   emptyMessage?: string;
 }) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const [mapError, setMapError] = useState<string | null>(null);
   const signature = JSON.stringify({ stops, geometry, activeSequence });
 
   useEffect(() => {
@@ -44,9 +68,13 @@ export default function RouteMap({
     let onResize: (() => void) | null = null;
 
     async function mount() {
-      const leafletModule = await import("leaflet");
-      const L = (leafletModule as unknown as { default?: typeof import("leaflet") }).default ?? leafletModule;
+      const leafletModule = await import("leaflet").catch(() => null);
+      const L = resolveLeaflet(leafletModule);
       if (cancelled || !containerRef.current || stops.length === 0) return;
+      if (!L) {
+        setMapError("The map library could not be loaded. Reload the page to try again.");
+        return;
+      }
 
       map = L.map(containerRef.current, {
         scrollWheelZoom: false,
@@ -133,7 +161,13 @@ export default function RouteMap({
       window.addEventListener("resize", onResize);
     }
 
-    void mount();
+    setMapError(null);
+    void mount().catch((error: unknown) => {
+      if (cancelled) return;
+      map?.remove();
+      map = null;
+      setMapError(error instanceof Error ? error.message : "The route map could not be drawn.");
+    });
 
     return () => {
       cancelled = true;
@@ -159,6 +193,17 @@ export default function RouteMap({
   return (
     <div className={cn("relative overflow-hidden rounded-control border")}>
       <div ref={containerRef} style={{ height }} aria-label="Map of ordered pickup and drop-off stops" />
+      {mapError ? (
+        <div
+          role="status"
+          className="absolute inset-0 z-[401] flex flex-col items-center justify-center gap-1 bg-surface-muted px-6 text-center"
+        >
+          <p className="text-sm font-medium text-ink">Map unavailable</p>
+          <p className="max-w-sm text-xs leading-5 text-muted">
+            {mapError} The ordered stop list is unaffected.
+          </p>
+        </div>
+      ) : null}
       <div className="absolute bottom-2 left-2 z-[400] rounded bg-white/95 px-2 py-1 text-[10px] font-medium text-ink-2 shadow-sm">
         {geometrySource === "osrm" ? "Road route · OSRM" : "Illustrative connectors — estimated, not road navigation"}
       </div>

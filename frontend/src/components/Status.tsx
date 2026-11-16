@@ -5,7 +5,6 @@ import {
   CheckCircle2,
   Clock3,
   Layers,
-  MapPin,
   Navigation,
   Package,
   Truck,
@@ -23,16 +22,18 @@ const TONE_CLASS: Record<StatusTone, string> = {
   red: "chip-red",
 };
 
+const DONE = ["delivered", "returned", "completed", "resolved", "valid", "verified"];
+const BAD = ["failed", "rejected", "cancelled"];
+
 function StatusIcon({ status }: { status: string }) {
   const common = { size: 13, strokeWidth: 2.2, "aria-hidden": true } as const;
-  if (["delivered", "completed", "resolved", "verified"].includes(status)) return <CheckCircle2 {...common} />;
-  if (["failed", "rejected"].includes(status)) return <AlertTriangle {...common} />;
-  if (status === "cancelled") return <Ban {...common} />;
-  if (["pickup_arrived", "picked_up", "in_transit", "in_progress", "on_route"].includes(status))
+  if (DONE.includes(status)) return <CheckCircle2 {...common} />;
+  if (BAD.includes(status)) return <AlertTriangle {...common} />;
+  if (["pickup_arrived", "picked_up", "in_transit", "out_for_delivery", "delivery_proof_pending"].includes(status))
     return <Truck {...common} />;
-  if (["assigned", "accepted", "partner_accepted"].includes(status)) return <Navigation {...common} />;
-  if (["proposed", "offered", "batched"].includes(status)) return <Layers {...common} />;
-  if (status === "open" || status === "in_review") return <MapPin {...common} />;
+  if (["assigned", "pickup_scheduled"].includes(status)) return <Navigation {...common} />;
+  if (["active", "assigned_batch"].includes(status)) return <Layers {...common} />;
+  if (status === "cancelled") return <Ban {...common} />;
   return <Clock3 {...common} />;
 }
 
@@ -58,10 +59,4 @@ export function ServiceBadge({ type }: { type: string }) {
 export function SeverityBadge({ severity }: { severity: string }) {
   const tone = severity === "high" ? "chip-red" : severity === "medium" ? "chip-amber" : "chip-neutral";
   return <span className={cn("chip capitalize", tone)}>{severity}</span>;
-}
-
-export function VerificationBadge({ status }: { status: string }) {
-  const tone =
-    status === "verified" ? "chip-green" : status === "rejected" ? "chip-red" : "chip-amber";
-  return <span className={cn("chip capitalize", tone)}>{status}</span>;
 }

@@ -8,13 +8,10 @@ const API_BASE =
 
 export class ServerUnauthorizedError extends Error {}
 
-/**
- * Server-only API access. The browser session cookie is forwarded explicitly;
- * no server secret is ever exposed to the client.
- */
 export async function serverFetch<T>(path: string): Promise<T> {
-  const cookieStore = await cookies();
-  const cookieHeader = cookieStore.toString();
+  // Read cookies before the try block: Next throws its dynamic-rendering bailout
+  // from cookies(), and that must not be reported as an unreachable API.
+  const cookieHeader = (await cookies()).toString();
   let response: Response;
   try {
     response = await fetch(`${API_BASE}/api/v1${path}`, {
@@ -39,11 +36,11 @@ export async function serverFetch<T>(path: string): Promise<T> {
 export async function serverFetchList<T>(
   path: string,
 ): Promise<{ data: T[]; meta?: { unread_count?: number; total?: number } }> {
-  const cookieStore = await cookies();
+  const cookieHeader = (await cookies()).toString();
   let response: Response;
   try {
     response = await fetch(`${API_BASE}/api/v1${path}`, {
-      headers: { Accept: "application/json", Cookie: cookieStore.toString() },
+      headers: { Accept: "application/json", Cookie: cookieHeader },
       cache: "no-store",
     });
   } catch {

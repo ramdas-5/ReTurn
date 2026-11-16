@@ -1,50 +1,53 @@
-# ReTurn assumptions and decisions
+# ReTurn assumptions and decisions (v2)
 
-These are deliberate implementation choices where the brief left room for judgement.
+## Product and roles
+
+1. Only consumers self-register. Drivers and managers are provisioned by administrators; drivers may also be provisioned by managers. Administrators are created through the bootstrap command/environment, not public signup.
+2. A driver must be verified, on a live duty session, covered by the pickup service area and using a verified active vehicle before assignment. These rules are revalidated at assignment and suggestion approval.
+3. A manager sees only orders whose pickup area is in their assigned service areas. Administrators see all orders.
+4. Consumers may cancel only before the parcel is in a driver's custody. After that, support/issues is the route.
+5. Delivery completion requires a captured photo when `DELIVERY_PROOF_REQUIRED=true` (the default). A failed capture is an exception, not a completed delivery.
+6. Pickup proof is optional by default (`PICKUP_PROOF_REQUIRED=false`) but the API and UI support it.
+7. Proof location is required by default (`PROOF_REQUIRE_GPS=true`) and validated against the stop radius and accuracy limits. A browser may deny location; the driver is then shown an explicit error rather than an invented point.
 
 ## Matching and routing
 
-1. **Baseline definition.** Each request's separate-trip baseline is one direct pickup → destination trip. The shared route and baseline use the same matrix (OSRM if reachable, otherwise the same labelled road-factor estimate). Partner repositioning to the first pickup is excluded from both.
-2. **Service time.** A configurable 6 minutes per stop is included in scheduling and duration. It is not included in the distance baseline.
-3. **Pickup radius.** 8 km is a coarse *prefilter* from the seed pickup, not approval. Every proposed group is still fully simulated.
-4. **Detour.** A request's detour is the distance it travels from its pickup to its own drop-off along the shared route minus its direct pickup→drop-off distance. Default cap is 12 km; exceeding it rejects the insertion.
-5. **Savings threshold.** Default minimum estimated saving is 12%. Zero, negative or sub-threshold groups are rejected; negative savings are never presented as positive.
-6. **Reference vehicle.** If no verified/available partner fits, a preview may use the configured reference vehicle (40 kg / 0.25 m³) and the UI discloses that no partner is assigned. A real partner's capacity replaces it when offered/committed.
-7. **Restricted handling.** A parcel flagged `restricted` requires a dedicated vehicle and cannot share a batch. Fragile parcels require `accepts_fragile` on the vehicle. Liquids are captured as handling metadata and require explicit vehicle support only through the fragile/restricted rules; no refrigerated or hazmat-specific model exists in the MVP.
-8. **Partner availability.** Only `verified` + `available` partners are offered or offered-in-preview. Verification is an administrator action with an audit trail.
-9. **One active reservation.** Enforced with a PostgreSQL partial unique index. Completed batch membership rows remain for history; `released_at` marks releases. A request in a terminal state is never eligible for matching regardless.
-10. **Configurability.** Group size, radius, detour, savings threshold, service time, speed and road factor are per-preview parameters (bounded server-side) and defaults live in environment config. They are tuning choices, not universal optimums.
+1. Matching is a deterministic insertion heuristic over each driver's **active route**, not machine learning and not an exact solver.
+2. Suggestions are persisted with score, detour, added duration, reasons, blockers and a capacity snapshot. They expire after `suggestion_ttl_minutes`.
+3. Manager approval re-runs the full evaluation before assignment; stale or expired suggestions are refused.
+4. `max_pickup_radius_km` is a corridor prefilter, not approval. Full capacity, window, deadline, precedence and detour checks still run.
+5. `max_detour_km` limits how far the route may grow. The added duration is an estimate from the routing source.
+6. Administrator matching overrides are stored in `admin_settings` and merged over environment defaults. They affect new plans and scans immediately.
+7. OSRM is used when reachable. On failure, distance is haversine × road factor and duration uses average speed; labels and dashed map connectors state that this is an estimate, not road navigation.
+8. Fuel and CO₂e are modelled from stored distance and configurable factors. They are never measured telemetry and negative savings are clamped to zero.
 
-## Estimation honesty
+## Proof and location privacy
 
-- All distance/fuel/CO₂e figures are **modelled estimates**. The UI uses “Estimated” in labels and explains the factors.
-- If OSRM is unavailable, distance is haversine × road factor and duration uses average speed; both map connectors and copy are labelled illustrative. No road navigation is implied.
-- No live GPS or vehicle position is displayed, and no “live tracking” claim is made beyond parcel event history.
-- Map tiles require network access; the app remains usable without them and labels missing geometry.
+1. Location is collected only while a driver is on duty and explicitly consents in the request. ReTurn does not track off-duty drivers.
+2. The platform shows only the latest reported point and labels it live recent, stale or unavailable. It does not interpolate or fabricate positions.
+3. Proof media is private and served only through signed, expiring URLs with authorization checks.
+4. Local media storage is a development fallback. Hosted deployments should use S3 because container filesystems are ephemeral.
 
-## Identity, privacy and security
+## Accounts and security
 
-- Sessions are server-side in PostgreSQL; only a SHA-256 hash of the random token is stored. The browser receives an HttpOnly cookie. `Secure` is enabled by configuration in HTTPS deployments.
-- CSRF uses a double-submit cookie plus a session-bound token for authenticated mutations.
-- Contact details are exposed only to the owning customer, the assigned partner after acceptance, and administrators. Customer batch payloads never include other customers' requests.
-- No email delivery exists; notifications are in-app. Email preferences are stored and displayed but not dispatched.
-- Rate limiting is in-process and aimed at a single-instance demo. Production should move it to a shared store.
-- Demo accounts and seeded addresses are fictional and must not be enabled in production.
+1. Sessions are server-side in PostgreSQL; only a token hash is stored. Cookies are HttpOnly and `SameSite=Lax`; `Secure` must be enabled on HTTPS.
+2. CSRF is a double-submit cookie plus a session-bound token.
+3. Rate limiting is in-process and intended for a single instance. Multi-instance deployments need a shared store or gateway.
+4. Reset and activation tokens are returned in development when `AUTH_EXPOSE_RESET_TOKENS=true` because no email provider is configured. This must be disabled in production with a real email integration.
+5. Account suspension, verification, service area and matching configuration changes are audited.
 
-## Domain/product scope
+## Frontend
 
-- One time zone (`Asia/Kolkata`) is offered in the UI; timestamps are stored in UTC with timezone-aware columns. The schema allows more zones later.
-- Delivery deadlines are hard. There is no partial-delivery or multi-attempt model beyond `failed`, an issue and manual resolution.
-- A parcel has one item description with weight/volume and handling flags; multiple parcel rows per request are not implemented (one request = one parcel in the MVP).
-- Customer cancellation is allowed while pending, or while the batch is still `proposed`. Once a partner accepts, online cancellation is blocked and support/issues are the route.
-- Admin cancellation is blocked once a route is in progress. In-flight parcels are intentionally not silently discarded.
-- Reassignment produces a fresh offer requiring partner acceptance; it does not force an assignment accepted on the partner's behalf.
-- Partner verification does not expire automatically; admins can move a partner back to pending.
+1. Role layouts guard navigation with `requireUser(role)`; every action is still authorized by Flask.
+2. Client pages fetch real API data with TanStack Query. There are no hardcoded dashboard metrics.
+3. The consumer booking form requires either an exterior photograph or a written exception of at least 12 characters.
+4. Availability shown before booking is calculated from stored service areas, verified schedules and live duty sessions. It is not a driver commitment.
+5. Maps are illustrative route visualisations, not live navigation or vehicle telemetry. Navigation links open Google Maps directions to a stop.
+6. Demo seed data is fictional and must not be enabled where real data is stored.
 
-## Frontend decisions
+## Known scope limits
 
-- Next.js Server Components fetch the Flask API server-to-server and forward the user's cookie. The browser calls only same-origin `/api/v1` through a rewrite, avoiding CORS and keeping cookies first-party.
-- Leaflet is client-only; dynamic import happens inside an effect. Marker popups are built with DOM text nodes rather than HTML strings to avoid injecting customer content.
-- Guided request creation is a three-step client wizard (locations → parcel/schedule → review) with server-authoritative validation. Sample locations are fictional demo places; manual pins are supported.
-- Tables reflow into cards below `md`. Partner controls use large minimum tap targets. Loading/error/empty states exist for the role shells and data views.
-- Demo credentials are documented only in the README and seed script, not on public pages.
+- No email delivery, MFA, payments or e-commerce integration.
+- No automated browser E2E suite; verification is API tests plus frontend typecheck/lint/unit/build.
+- Multi-parcel-per-order and multi-city tenancy are not implemented.
+- Public OSRM is best-effort and may rate-limit.
