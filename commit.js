@@ -3,7 +3,7 @@
 
 /**
  * commit.js - step-by-step git commit helper for this repository.
- *
+ *dasdasdAWEDaSDW#EDQWE#ER
  * Interactive:      node commit.js
  * With message:     node commit.js -m "feat: add driver duty controls"
  * Stage everything: node commit.js -a -m "..."
