@@ -15,6 +15,7 @@ import {
 import Link from "next/link";
 
 import { Brand, RouteMark } from "@/components/Brand";
+import { palette } from "@/lib/design-tokens";
 import { getMe } from "@/lib/server";
 import type { AuthMe } from "@/lib/types";
 import { homeFor } from "@/lib/roles";
@@ -92,10 +93,10 @@ export default async function LandingPage() {
         <div className="container-page flex h-[76px] items-center justify-between gap-4">
           <Brand />
           <nav className="hidden items-center gap-6 text-sm text-muted md:flex" aria-label="Landing">
-            <a href="#how-it-works" className="hover:text-ink">How it works</a>
-            <a href="#services" className="hover:text-ink">Services</a>
-            <a href="#checks" className="hover:text-ink">What we check</a>
-            <a href="#impact" className="hover:text-ink">Impact</a>
+            <a href="#how-it-works" className="hover:text-white">How it works</a>
+            <a href="#services" className="hover:text-white">Services</a>
+            <a href="#checks" className="hover:text-white">What we check</a>
+            <a href="#impact" className="hover:text-white">Impact</a>
           </nav>
           <div className="flex items-center gap-2">
             <Link href={signInHref} className="btn btn-ghost btn-sm">
@@ -108,11 +109,11 @@ export default async function LandingPage() {
         </div>
       </header>
 
-      <section className="relative overflow-hidden bg-ink text-white">
-        <div className="pointer-events-none absolute -right-24 top-10 h-[520px] w-[520px] rounded-full bg-accent/25 blur-[120px]" aria-hidden="true" />
+      <section className="on-dark relative overflow-hidden bg-canvas text-white">
+        <div className="pointer-events-none absolute -right-24 top-10 h-[520px] w-[520px] rounded-full bg-danger/30 blur-[120px]" aria-hidden="true" />
         <div className="container-page relative grid gap-12 py-14 lg:grid-cols-[1.02fr_1fr] lg:items-center lg:py-20">
           <div className="animate-fade-up">
-            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-[11px] font-medium text-lime">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/5 px-3 py-1.5 text-2xs font-medium text-white">
               <Sparkles size={13} aria-hidden />
               Smart reverse delivery & shared logistics
             </div>
@@ -121,7 +122,7 @@ export default async function LandingPage() {
               <br />
               Smarter deliveries.
             </h1>
-            <p className="mt-5 max-w-xl text-[16px] leading-7 text-white/70">
+            <p className="mt-5 max-w-xl text-base leading-7 text-white/70">
               ReTurn combines compatible e-commerce returns and ordinary parcels into one feasible multi-stop route —
               only when windows, capacity, handling and destinations genuinely allow it. One route. Multiple deliveries.
               Less waste.
@@ -134,37 +135,37 @@ export default async function LandingPage() {
                 Return a product
               </Link>
             </div>
-            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-[12px] text-white/55">
+            <div className="mt-8 flex flex-wrap items-center gap-x-6 gap-y-2 text-xs text-white/65">
               <span className="inline-flex items-center gap-1.5">
-                <ShieldCheck size={14} className="text-lime" aria-hidden /> Verified drivers only
+                <ShieldCheck size={14} className="text-white" aria-hidden /> Verified drivers only
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Route size={14} className="text-lime" aria-hidden /> Explainable, rule-based matching
+                <Route size={14} className="text-white" aria-hidden /> Explainable, rule-based matching
               </span>
               <span className="inline-flex items-center gap-1.5">
-                <Leaf size={14} className="text-lime" aria-hidden /> Estimated, never invented, savings
+                <Leaf size={14} className="text-white" aria-hidden /> Estimated, never invented, savings
               </span>
             </div>
           </div>
 
           <div className="relative">
-            <div className="rounded-[24px] border border-white/12 bg-[#0d201f] p-4 shadow-[0_30px_80px_rgba(0,0,0,0.35)] sm:p-5">
+            <div className="rounded-card border border-white/12 bg-canvas p-4 shadow-floating sm:p-5">
               <div className="flex items-center justify-between gap-3">
-                <p className="text-[11px] font-medium uppercase tracking-[0.2em] text-white/45">Illustrative neighbourhood plan</p>
-                <span className="rounded-full bg-lime/15 px-2.5 py-1 text-[10px] font-semibold text-lime">
+                <p className="text-2xs font-medium uppercase tracking-[0.2em] text-white/60">Illustrative neighbourhood plan</p>
+                <span className="rounded-full bg-white/15 px-2.5 py-1 text-2xs font-semibold text-white">
                   Illustrative scenario
                 </span>
               </div>
               <NeighbourhoodIllustration />
               <div className="mt-4 flex flex-wrap items-center justify-between gap-3 rounded-control border border-white/10 bg-white/[0.04] px-3.5 py-3">
                 <div>
-                  <p className="text-[13px] font-semibold">3 requests · 1 coordinated batch</p>
-                  <p className="text-[11px] text-white/50">Two authorised return hubs and one recipient address preserved</p>
+                  <p className="text-sm font-semibold">3 requests · 1 coordinated batch</p>
+                  <p className="text-2xs text-white/65">Two authorised return hubs and one recipient address preserved</p>
                 </div>
-                <span className="chip border-lime/25 bg-lime/10 text-lime">Feasibility required</span>
+                <span className="chip border-white/25 bg-white/10 text-white">Feasibility required</span>
               </div>
             </div>
-            <p className="mt-3 text-center text-[10px] leading-4 text-white/40">
+            <p className="mt-3 text-center text-2xs leading-4 text-white/65">
               Fictional demonstration data. Route geometry is illustrative; savings shown by the product are modelled estimates.
             </p>
           </div>
@@ -174,7 +175,7 @@ export default async function LandingPage() {
       <section id="services" className="container-page py-16">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">Two services, one coordination layer</p>
-          <h2 className="mt-2 text-[32px] font-bold leading-tight sm:text-[38px]">Start with what you actually need</h2>
+          <h2 className="mt-2 text-4xl font-bold leading-tight sm:text-6xl">Start with what you actually need</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
             A return and a normal parcel are different journeys. ReTurn keeps that distinction while looking for a
             sensible way to share the road.
@@ -210,12 +211,12 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <section id="checks" className="border-y bg-surface-muted/60 py-16">
+      <section id="checks" className="surface-light border-y py-16">
         <div className="container-page">
           <div className="flex flex-col gap-3 sm:flex-row sm:items-end sm:justify-between">
             <div>
               <p className="eyebrow">Compatibility, not proximity</p>
-              <h2 className="mt-2 text-[30px] font-bold sm:text-[34px]">What ReTurn checks before grouping</h2>
+              <h2 className="mt-2 text-4xl font-bold sm:text-5xl">What ReTurn checks before grouping</h2>
             </div>
             <p className="max-w-md text-sm leading-6 text-muted">
               Nearby does not always mean compatible. Every proposed group must pass all six checks and beat the
@@ -229,7 +230,7 @@ export default async function LandingPage() {
                   <check.icon size={19} aria-hidden />
                 </span>
                 <h3 className="mt-4 text-base font-semibold">{check.title}</h3>
-                <p className="mt-1 text-[13px] leading-6 text-muted">{check.body}</p>
+                <p className="mt-1 text-sm leading-6 text-muted">{check.body}</p>
               </div>
             ))}
           </div>
@@ -239,34 +240,34 @@ export default async function LandingPage() {
       <section id="how-it-works" className="container-page py-16">
         <div className="mx-auto max-w-2xl text-center">
           <p className="eyebrow">The honest workflow</p>
-          <h2 className="mt-2 text-[32px] font-bold sm:text-[38px]">Create → coordinate → execute → track</h2>
+          <h2 className="mt-2 text-4xl font-bold sm:text-6xl">Create → coordinate → execute → track</h2>
           <p className="mt-3 text-sm leading-6 text-muted">
             No magic dispatch, no fabricated live tracking. A real manager reviews feasibility and an assigned verified driver
             executes each stop with proof.
           </p>
         </div>
         <div className="relative mt-10 grid gap-4 md:grid-cols-4">
-          <div className="absolute left-8 right-8 top-9 hidden border-t border-dashed border-accent/40 md:block" aria-hidden="true" />
+          <div className="absolute left-8 right-8 top-9 hidden border-t border-dashed border-danger/50 md:block" aria-hidden="true" />
           {PROCESS.map((step, index) => (
             <div key={step.title} className="relative card p-5">
               <div className="flex items-center gap-3">
-                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-ink text-[13px] font-bold text-white">
+                <span className="flex h-9 w-9 items-center justify-center rounded-full bg-canvas text-sm font-bold text-white">
                   {index + 1}
                 </span>
                 <step.icon size={18} className="text-accent" aria-hidden />
               </div>
               <h3 className="mt-4 text-base font-semibold">{step.title}</h3>
-              <p className="mt-1 text-[13px] leading-6 text-muted">{step.body}</p>
+              <p className="mt-1 text-sm leading-6 text-muted">{step.body}</p>
             </div>
           ))}
         </div>
       </section>
 
-      <section id="impact" className="bg-ink py-16 text-white">
+      <section id="impact" className="on-dark bg-canvas py-16 text-white">
         <div className="container-page grid gap-10 lg:grid-cols-[1fr_1.05fr] lg:items-center">
           <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-lime">Estimated, with assumptions</p>
-            <h2 className="mt-3 text-[32px] font-bold leading-tight sm:text-[38px]">
+            <p className="text-2xs font-semibold uppercase tracking-[0.18em] text-white">Estimated, with assumptions</p>
+            <h2 className="mt-3 text-4xl font-bold leading-tight sm:text-6xl">
               Transparent impact — not eco theatre
             </h2>
             <p className="mt-3 max-w-xl text-sm leading-6 text-white/65">
@@ -278,17 +279,17 @@ export default async function LandingPage() {
           <div className="rounded-card border border-white/12 bg-white/[0.04] p-5">
             <div className="grid gap-3 sm:grid-cols-2">
               <div className="rounded-control border border-white/10 bg-white/[0.03] p-4">
-                <p className="text-[10px] uppercase tracking-wide text-white/45">Separate-trip baseline</p>
+                <p className="text-2xs uppercase tracking-wide text-white/60">Separate-trip baseline</p>
                 <p className="mono mt-2 text-2xl font-semibold">Modelled</p>
-                <p className="mt-1 text-[11px] text-white/50">One direct pickup → destination per request</p>
+                <p className="mt-1 text-2xs text-white/65">One direct pickup → destination per request</p>
               </div>
-              <div className="rounded-control border border-lime/25 bg-lime/10 p-4">
-                <p className="text-[10px] uppercase tracking-wide text-lime/80">Shared plan</p>
-                <p className="mono mt-2 text-2xl font-semibold text-lime">Modelled</p>
-                <p className="mt-1 text-[11px] text-lime/60">Same stops, same estimation basis</p>
+              <div className="rounded-control border border-white/25 bg-white/10 p-4">
+                <p className="text-2xs uppercase tracking-wide text-white/70">Shared plan</p>
+                <p className="mono mt-2 text-2xl font-semibold text-white">Modelled</p>
+                <p className="mt-1 text-2xs text-white/70">Same stops, same estimation basis</p>
               </div>
             </div>
-            <ul className="mt-4 space-y-2 text-[12px] leading-5 text-white/60">
+            <ul className="mt-4 space-y-2 text-xs leading-5 text-white/60">
               <li>• “Estimated distance saved” appears only when the shared route is shorter.</li>
               <li>• Negative savings are never rounded up into a positive claim.</li>
               <li>• Road routing is labelled when OSRM is reachable; estimated fallbacks are labelled too.</li>
@@ -309,16 +310,16 @@ export default async function LandingPage() {
             <div key={role.title} className="card card-pad">
               <role.icon size={20} className="text-accent" aria-hidden />
               <h3 className="mt-3 text-base font-semibold">{role.title}</h3>
-              <p className="mt-1 text-[13px] leading-6 text-muted">{role.body}</p>
+              <p className="mt-1 text-sm leading-6 text-muted">{role.body}</p>
             </div>
           ))}
         </div>
-        <div className="mt-10 flex flex-col items-center justify-between gap-4 rounded-card border bg-surface px-6 py-6 sm:flex-row">
+        <div className="panel mt-10 flex flex-col items-center justify-between gap-4 rounded-card border px-6 py-6 sm:flex-row">
           <div className="flex items-center gap-3">
             <RouteMark className="h-10 w-10 text-accent" />
             <div>
               <p className="font-display text-lg font-bold">Ready to see a real shared route?</p>
-              <p className="text-[13px] text-muted">Sign in with a demo role and walk the full workflow.</p>
+              <p className="text-sm text-muted">Sign in with a demo role and walk the full workflow.</p>
             </div>
           </div>
           <Link href={startHref} className="btn btn-primary">
@@ -327,25 +328,25 @@ export default async function LandingPage() {
         </div>
       </section>
 
-      <footer className="border-t bg-surface">
+      <footer className="border-t">
         <div className="container-page grid gap-8 py-10 md:grid-cols-[1.4fr_1fr_1fr]">
           <div>
             <Brand />
-            <p className="mt-3 max-w-sm text-[13px] leading-6 text-muted">
+            <p className="mt-3 max-w-sm text-sm leading-6 text-muted">
               A coordination and constrained route-planning demonstration. ReTurn does not own or operate courier
               vehicles, and does not claim trained AI or measured environmental savings.
             </p>
           </div>
-          <div className="text-[13px]">
+          <div className="text-sm">
             <p className="font-semibold">Explore</p>
             <ul className="mt-2 space-y-1.5 text-muted">
-              <li><a href="#how-it-works" className="hover:text-ink">How it works</a></li>
-              <li><a href="#checks" className="hover:text-ink">What we check</a></li>
-              <li><a href="#impact" className="hover:text-ink">Estimated impact</a></li>
-              <li><Link href="/auth" className="hover:text-ink">Sign in</Link></li>
+              <li><a href="#how-it-works" className="hover:text-white">How it works</a></li>
+              <li><a href="#checks" className="hover:text-white">What we check</a></li>
+              <li><a href="#impact" className="hover:text-white">Estimated impact</a></li>
+              <li><Link href="/auth" className="hover:text-white">Sign in</Link></li>
             </ul>
           </div>
-          <div className="text-[13px]">
+          <div className="text-sm">
             <p className="font-semibold">Scope & data</p>
             <ul className="mt-2 space-y-1.5 text-muted">
               <li>Demo data is fictional</li>
@@ -356,7 +357,7 @@ export default async function LandingPage() {
           </div>
         </div>
         <div className="border-t">
-          <div className="container-page flex flex-col items-start justify-between gap-2 py-4 text-[11px] text-muted sm:flex-row sm:items-center">
+          <div className="container-page flex flex-col items-start justify-between gap-2 py-4 text-2xs text-muted sm:flex-row sm:items-center">
             <p>© {new Date().getFullYear()} ReTurn. One Route. Multiple Deliveries. Less Waste.</p>
             <p>Built as a hackathon demonstration of feasible shared logistics.</p>
           </div>
@@ -385,19 +386,19 @@ function ServiceCard({
 }) {
   const isReturn = tone === "return";
   return (
-    <div className={`card card-pad border-t-4 ${isReturn ? "border-t-accent" : "border-t-[#2c6ca2]"}`}>
+    <div className={`card card-pad border-t-4 ${isReturn ? "border-t-accent" : "border-t-blue"}`}>
       <div className="flex items-start justify-between gap-3">
-        <span className={`flex h-11 w-11 items-center justify-center rounded-control ${isReturn ? "bg-accent-soft text-accent-strong" : "bg-blue-soft text-[#1d5580]"}`}>
+        <span className={`flex h-11 w-11 items-center justify-center rounded-control ${isReturn ? "bg-accent-soft text-accent-strong" : "bg-blue-soft text-blue-ink"}`}>
           {icon}
         </span>
         <span className={`chip ${isReturn ? "chip-teal" : "chip-blue"}`}>{isReturn ? "Teal lane" : "Blue lane"}</span>
       </div>
       <h3 className="mt-4 text-xl font-bold">{title}</h3>
       <p className="mt-2 text-sm leading-6 text-muted">{body}</p>
-      <ul className="mt-4 space-y-2 text-[13px] leading-5">
+      <ul className="mt-4 space-y-2 text-sm leading-5">
         {points.map((point) => (
           <li key={point} className="flex gap-2">
-            <CheckCircle2 size={15} className={`mt-0.5 shrink-0 ${isReturn ? "text-accent" : "text-[#2c6ca2]"}`} aria-hidden />
+            <CheckCircle2 size={15} className={`mt-0.5 shrink-0 ${isReturn ? "text-accent" : "text-blue"}`} aria-hidden />
             {point}
           </li>
         ))}
@@ -417,11 +418,11 @@ function NeighbourhoodIllustration() {
           <path d="M32 0H0V32" fill="none" stroke="rgba(203,240,140,0.08)" strokeWidth="1" />
         </pattern>
         <linearGradient id="routeFade" x1="0" y1="0" x2="1" y2="0">
-          <stop offset="0%" stopColor="#CBF08C" />
-          <stop offset="100%" stopColor="#67DDB0" />
+          <stop offset="0%" stopColor={palette.surface} />
+          <stop offset="100%" stopColor={palette.ink3} />
         </linearGradient>
       </defs>
-      <rect width="520" height="360" rx="18" fill="#0B1B1A" />
+      <rect width="520" height="360" rx="18" fill={palette.base} />
       <rect width="520" height="360" rx="18" fill="url(#grid)" />
       <path d="M-10 250 C 90 240, 120 190, 200 200 S 330 250, 540 220" fill="none" stroke="rgba(255,255,255,0.10)" strokeWidth="20" />
       <path d="M120 -10 C 140 70, 90 130, 120 220 S 110 310, 140 380" fill="none" stroke="rgba(255,255,255,0.07)" strokeWidth="14" />
@@ -437,33 +438,33 @@ function NeighbourhoodIllustration() {
         className="route-thread-path"
       />
       <g>
-        <circle cx="92" cy="270" r="16" fill="#CBF08C" />
-        <circle cx="92" cy="270" r="6" fill="#142A29" />
-        <text x="68" y="310" fill="#E6F1F9" fontSize="11" fontFamily="Inter, sans-serif">Rahul · return pickup</text>
+        <circle cx="92" cy="270" r="16" fill={palette.surface} />
+        <circle cx="92" cy="270" r="6" fill={palette.ink} />
+        <text x="68" y="310" fill={palette.surface} fontSize="11" fontFamily="Poppins, Inter, sans-serif">Rahul · return pickup</text>
       </g>
       <g>
-        <circle cx="190" cy="212" r="14" fill="#67DDB0" />
-        <circle cx="190" cy="212" r="5" fill="#142A29" />
-        <text x="150" y="190" fill="#E6F1F9" fontSize="11" fontFamily="Inter, sans-serif">Priya · parcel pickup</text>
+        <circle cx="190" cy="212" r="14" fill={palette.ink3} />
+        <circle cx="190" cy="212" r="5" fill={palette.ink} />
+        <text x="150" y="190" fill={palette.surface} fontSize="11" fontFamily="Poppins, Inter, sans-serif">Priya · parcel pickup</text>
       </g>
       <g>
-        <circle cx="318" cy="160" r="14" fill="#2C6CA2" />
-        <circle cx="318" cy="160" r="5" fill="#0B1B1A" />
-        <text x="288" y="138" fill="#E6F1F9" fontSize="11" fontFamily="Inter, sans-serif">Amit · return pickup</text>
+        <circle cx="318" cy="160" r="14" fill={palette.ink} />
+        <circle cx="318" cy="160" r="5" fill={palette.base} />
+        <text x="288" y="138" fill={palette.surface} fontSize="11" fontFamily="Poppins, Inter, sans-serif">Amit · return pickup</text>
       </g>
       <g>
-        <rect x="422" y="84" width="18" height="18" rx="5" fill="#2C6CA2" stroke="#E6F1F9" strokeWidth="2" />
-        <text x="370" y="74" fill="#B3C7BE" fontSize="10" fontFamily="Inter, sans-serif">Salt Lake recipient</text>
+        <rect x="422" y="84" width="18" height="18" rx="5" fill={palette.ink} stroke={palette.surface} strokeWidth="2" />
+        <text x="370" y="74" fill={palette.onBase} fontSize="10" fontFamily="Poppins, Inter, sans-serif">Salt Lake recipient</text>
       </g>
       <g>
-        <rect x="48" y="230" width="17" height="17" rx="5" fill="#087C60" stroke="#E6F1F9" strokeWidth="2" />
-        <text x="18" y="222" fill="#B3C7BE" fontSize="10" fontFamily="Inter, sans-serif">Authorised hub</text>
+        <rect x="48" y="230" width="17" height="17" rx="5" fill={palette.accent} stroke={palette.surface} strokeWidth="2" />
+        <text x="18" y="222" fill={palette.onBase} fontSize="10" fontFamily="Poppins, Inter, sans-serif">Authorised hub</text>
       </g>
       <g>
-        <rect x="248" y="104" width="17" height="17" rx="5" fill="#087C60" stroke="#E6F1F9" strokeWidth="2" />
-        <text x="208" y="96" fill="#B3C7BE" fontSize="10" fontFamily="Inter, sans-serif">Authorised hub</text>
+        <rect x="248" y="104" width="17" height="17" rx="5" fill={palette.accent} stroke={palette.surface} strokeWidth="2" />
+        <text x="208" y="96" fill={palette.onBase} fontSize="10" fontFamily="Poppins, Inter, sans-serif">Authorised hub</text>
       </g>
-      <text x="24" y="34" fill="#CBF08C" fontSize="10" fontFamily="IBM Plex Mono, monospace" letterSpacing="1.6">ONE SHARED ROUTE · 6 STOPS</text>
+      <text x="24" y="34" fill={palette.surface} fontSize="10" fontFamily="IBM Plex Mono, monospace" letterSpacing="1.6">ONE SHARED ROUTE · 6 STOPS</text>
     </svg>
   );
 }

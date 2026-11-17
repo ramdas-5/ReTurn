@@ -59,7 +59,7 @@ export default function NewBatchPage() {
           {error ? <div className="mt-3"><ErrorText>{error}</ErrorText></div> : null}
           <div className="mt-3 space-y-2">
             {orders?.data.map((order) => (
-              <label key={order.id} className="flex cursor-pointer items-start gap-3 rounded-control border p-3 text-sm hover:bg-surface-muted">
+              <label key={order.id} className="flex cursor-pointer items-start gap-3 rounded-control border p-3 text-sm hover:bg-surface-tint">
                 <input type="checkbox" name="order_ids" value={order.id} className="mt-1" />
                 <span>
                   <span className="font-semibold">{order.order_number}</span> · {order.service_type} · {order.pickup.area} → {order.delivery.area}

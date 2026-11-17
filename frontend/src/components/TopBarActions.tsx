@@ -46,13 +46,13 @@ export function NotificationMenu() {
       >
         <Bell size={19} aria-hidden />
         {unread > 0 ? (
-          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-[#b74444] px-1 text-[10px] font-semibold text-white">
+          <span className="absolute right-1 top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red px-1 text-2xs font-semibold text-white">
             {unread > 9 ? "9+" : unread}
           </span>
         ) : null}
       </button>
       {open ? (
-        <div className="absolute right-0 top-12 z-50 w-[330px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border bg-surface shadow-floating">
+        <div className="panel absolute right-0 top-12 z-50 w-[330px] max-w-[calc(100vw-2rem)] overflow-hidden rounded-card border shadow-floating">
           <div className="flex items-center justify-between border-b px-4 py-3">
             <p className="text-sm font-semibold">Notifications</p>
             <button
@@ -82,7 +82,7 @@ export function NotificationMenu() {
                     }
                     setOpen(false);
                   }}
-                  className="block border-b px-4 py-3 last:border-0 hover:bg-surface-muted"
+                  className="block border-b px-4 py-3 last:border-0 hover:bg-surface-tint"
                 >
                   <div className="flex items-start gap-2">
                     <span
@@ -92,9 +92,9 @@ export function NotificationMenu() {
                       aria-label={item.read_at ? undefined : "Unread"}
                     />
                     <div>
-                      <p className="text-[13px] font-medium leading-5">{item.title}</p>
+                      <p className="text-sm font-medium leading-5">{item.title}</p>
                       <p className="mt-0.5 text-xs leading-5 text-muted">{item.body}</p>
-                      <p className="mt-1 text-[10px] uppercase tracking-wide text-muted">
+                      <p className="mt-1 text-2xs uppercase tracking-wide text-muted">
                         {relativeTime(item.created_at)}
                       </p>
                     </div>
@@ -127,8 +127,8 @@ export function TopBarUser({ user }: { user: ApiUser }) {
   return (
     <div className="flex items-center gap-2">
       <div className="hidden text-right sm:block">
-        <p className="text-[13px] font-semibold leading-4">{user.full_name}</p>
-        <p className="text-[11px] capitalize leading-4 text-muted">{user.role}</p>
+        <p className="text-sm font-semibold leading-4">{user.full_name}</p>
+        <p className="text-2xs capitalize leading-4 text-muted">{user.role}</p>
       </div>
       <div
         className="flex h-9 w-9 items-center justify-center rounded-full bg-accent-soft text-xs font-bold text-accent-strong"

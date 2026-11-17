@@ -35,10 +35,12 @@ src/app/
   manager/         dashboard, order queue, matching, batches, drivers, live, proofs, issues, reports
   admin/           dashboard, analytics, operations, orders, batches, accounts, fleet, areas, config, audit, settings
 src/components/    shell, nav, status, timeline, maps, order form, role action panels
-src/lib/           API client, server cookie fetch, types, format, roles
+src/lib/           API client, server cookie fetch, types, format, roles, design-tokens
 ```
 
 Role layouts are server components using `requireUser(role)`. This is a navigation guard; Flask enforces authorization for every endpoint.
+
+Visual and accessibility tokens are declared once in `src/app/globals.css` and exposed to Tailwind in `tailwind.config.ts`. The captured values from `DESIGN.md` are applied verbatim: `#000000` base surface, `#ffffff` panel surface, `#202020`/`#242723`/`#4a4144` text, `#7c1d25` accent, Poppins at 20px/20px, the 13–22.5px type scale, the 5–20px spacing scale, and 300/500/800 ms motion. Page chrome uses `surface.base`; cards, panels, tables and inputs use `surface.muted` and re-declare the light text tokens through `.surface-light`/`.panel`, so text always resolves against the surface it sits on. `src/lib/design-tokens.ts` holds the only raw palette values in TypeScript, because Recharts and Leaflet cannot resolve CSS variables in SVG attributes.
 
 ## Backend modules
 

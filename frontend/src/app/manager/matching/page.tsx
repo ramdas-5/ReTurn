@@ -80,7 +80,7 @@ export default function MatchingPage() {
               </div>
               <span className={`chip ${suggestion.status === "pending" ? "chip-amber" : suggestion.status === "approved" ? "chip-green" : "chip-neutral"}`}>{suggestion.status}</span>
             </div>
-            <div className="mt-3 grid grid-cols-2 gap-2 text-[13px]">
+            <div className="mt-3 grid grid-cols-2 gap-2 text-sm">
               <p>Detour <span className="font-semibold">{formatKm(suggestion.detour_km, 2)}</span></p>
               <p>Score <span className="font-semibold">{suggestion.score?.toFixed(1) ?? "—"}</span></p>
               <p>Added time <span className="font-semibold">{suggestion.added_duration_minutes?.toFixed(1) ?? "—"} min</span></p>

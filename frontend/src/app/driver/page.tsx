@@ -33,7 +33,7 @@ export default function DriverDashboard() {
         actions={<Link href="/driver/duty" className="btn btn-secondary">Duty & availability</Link>}
       />
       {summary.isLoading ? <p className="text-sm text-muted">Loading dashboard…</p> : null}
-      {summary.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(summary.error as Error).message}</p> : null}
+      {summary.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(summary.error as Error).message}</p> : null}
       {data ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -34,10 +34,10 @@ export default function ManagerOrdersPage() {
         {FILTERS.map((filter) => (
           <button key={filter.label} className={`chip ${status === filter.status ? "chip-teal" : "chip-neutral"}`} onClick={() => setStatus(filter.status)}>{filter.label}</button>
         ))}
-        <input className="input !w-auto !py-1.5 text-[13px]" placeholder="Search order or consumer" value={q} onChange={(event) => setQ(event.target.value)} />
+        <input className="input !w-auto !py-1.5 text-sm" placeholder="Search order or consumer" value={q} onChange={(event) => setQ(event.target.value)} />
       </div>
       {isLoading ? <p className="text-sm text-muted">Loading orders…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? <OrderList orders={data.data} hrefBase="/manager/orders" showConsumer emptyTitle="No orders in this filter" emptyDescription="Try another queue or clear the search." /> : null}
     </div>
   );

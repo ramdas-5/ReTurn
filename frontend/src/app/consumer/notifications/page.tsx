@@ -33,12 +33,12 @@ export default function ConsumerNotificationsPage() {
       {isLoading ? <p className="text-sm text-muted">Loading notifications…</p> : null}
       <div className="space-y-2">
         {data?.data.map((item) => (
-          <article key={item.id} className={`rounded-card border bg-surface p-4 ${item.read_at ? "" : "border-accent/40"}`}>
+          <article key={item.id} className={`panel rounded-card border p-4 ${item.read_at ? "" : "border-danger"}`}>
             <div className="flex items-start justify-between gap-3">
               <div>
                 <p className="text-sm font-semibold">{item.title}</p>
-                <p className="mt-1 text-[13px] leading-6 text-muted">{item.body}</p>
-                <p className="mt-1 text-[11px] text-muted">{formatDateTime(item.created_at)}</p>
+                <p className="mt-1 text-sm leading-6 text-muted">{item.body}</p>
+                <p className="mt-1 text-2xs text-muted">{formatDateTime(item.created_at)}</p>
               </div>
               {!item.read_at ? <button className="btn btn-ghost btn-sm" onClick={() => markOne(item.id)}>Mark read</button> : null}
             </div>

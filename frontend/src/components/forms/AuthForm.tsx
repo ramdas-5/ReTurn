@@ -47,7 +47,7 @@ export default function AuthForm({ nextPath }: { nextPath?: string }) {
 
   return (
     <div className="card card-pad">
-      <div className="mb-6 flex rounded-control bg-surface-muted p-1" role="tablist" aria-label="Account access">
+      <div className="mb-6 flex rounded-control bg-surface-tint p-1" role="tablist" aria-label="Account access">
         {(["login", "register"] as const).map((value) => (
           <button
             key={value}
@@ -69,7 +69,7 @@ export default function AuthForm({ nextPath }: { nextPath?: string }) {
 
       <form onSubmit={submit} className="space-y-4" noValidate>
         {error ? (
-          <p className="rounded-control border border-[#f3d1cb] bg-red-soft px-3 py-2 text-[13px] text-[#8c2f2f]" role="alert">
+          <p className="rounded-control border border-red-border bg-red-soft px-3 py-2 text-sm text-red-ink" role="alert">
             {error}
           </p>
         ) : null}

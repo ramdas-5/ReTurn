@@ -19,7 +19,7 @@ export default function AdminOrderDetailPage() {
   });
 
   if (isLoading) return <p className="text-sm text-muted">Loading order…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
   return (
     <div>
@@ -32,7 +32,7 @@ export default function AdminOrderDetailPage() {
               <div><p className="eyebrow">Pickup</p><p className="mt-1 font-medium">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p><p className="text-xs text-muted">{formatWindow(data.pickup.window_start, data.pickup.window_end)}</p></div>
               <div><p className="eyebrow">Delivery</p><p className="mt-1 font-medium">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p><p className="text-xs text-muted">Deadline {formatDateTime(data.delivery.deadline)}</p></div>
             </div>
-            <p className="mt-3 text-[13px]">{data.parcel.name} · {data.parcel.weight_kg} kg · {data.parcel.is_fragile ? "fragile" : "standard"}</p>
+            <p className="mt-3 text-sm">{data.parcel.name} · {data.parcel.weight_kg} kg · {data.parcel.is_fragile ? "fragile" : "standard"}</p>
           </Card>
           <ManagerOrderActions orderId={data.id} status={data.status} suggestions={data.suggestions ?? []} />
         </div>

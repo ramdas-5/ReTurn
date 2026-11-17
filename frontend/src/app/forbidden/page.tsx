@@ -12,11 +12,11 @@ export default async function ForbiddenPage() {
   return (
     <main className="flex min-h-screen flex-col items-center justify-center px-5 text-center">
       <Brand />
-      <span className="mt-10 flex h-12 w-12 items-center justify-center rounded-full bg-red-soft text-[#8c2f2f]">
+      <span className="mt-10 flex h-12 w-12 items-center justify-center rounded-full bg-red-soft text-red-ink">
         <ShieldAlert size={22} aria-hidden />
       </span>
       <p className="eyebrow mt-5">403 · Access denied</p>
-      <h1 className="mt-2 text-[30px] font-bold">That lane isn&apos;t yours</h1>
+      <h1 className="mt-2 text-3xl font-bold">That lane isn&apos;t yours</h1>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted">
         Your account role does not have permission for this view. Authorization is enforced by the ReTurn API, not just
         hidden navigation.

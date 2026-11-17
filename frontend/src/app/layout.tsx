@@ -1,27 +1,16 @@
-import type { Metadata } from "next";
-import { IBM_Plex_Mono, Inter, Plus_Jakarta_Sans } from "next/font/google";
+import type { Metadata, Viewport } from "next";
+import { Poppins } from "next/font/google";
 
 import Providers from "./providers";
+import { palette } from "@/lib/design-tokens";
 import "./globals.css";
 
-const display = Plus_Jakarta_Sans({
+/** DESIGN.md §Style Foundations — Poppins is the primary family. */
+const primary = Poppins({
   subsets: ["latin"],
-  variable: "--font-display",
+  variable: "--font-poppins",
   display: "swap",
-  weight: ["500", "600", "700", "800"],
-});
-
-const body = Inter({
-  subsets: ["latin"],
-  variable: "--font-body",
-  display: "swap",
-});
-
-const mono = IBM_Plex_Mono({
-  subsets: ["latin"],
-  variable: "--font-mono",
-  display: "swap",
-  weight: ["400", "500"],
+  weight: ["400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -35,10 +24,16 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 };
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  themeColor: palette.base,
+};
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={`${display.variable} ${body.variable} ${mono.variable}`}>
-      <body>
+    <html lang="en" className={primary.variable}>
+      <body className="on-dark">
         <Providers>{children}</Providers>
       </body>
     </html>

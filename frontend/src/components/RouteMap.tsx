@@ -5,6 +5,7 @@ import "leaflet/dist/leaflet.css";
 import { useEffect, useRef, useState } from "react";
 
 import { cn } from "@/lib/cn";
+import { palette } from "@/lib/design-tokens";
 
 export type MapStop = {
   id: string | number;
@@ -92,7 +93,7 @@ export default function RouteMap({
       if (geometry?.coordinates?.length) {
         L.geoJSON(geometry as GeoJSON.GeoJsonObject, {
           style: {
-            color: "#087C60",
+            color: palette.accent,
             weight: 4,
             opacity: 0.88,
             dashArray: geometrySource === "estimated" ? "7 7" : undefined,
@@ -101,7 +102,7 @@ export default function RouteMap({
         }).addTo(map);
       } else if (points.length > 1) {
         L.polyline(points, {
-          color: "#087C60",
+          color: palette.accent,
           weight: 4,
           opacity: 0.8,
           dashArray: "7 7",
@@ -135,7 +136,7 @@ export default function RouteMap({
         const label = document.createElement("p");
         label.style.margin = "0";
         label.style.fontSize = "12px";
-        label.style.color = "#5E726F";
+        label.style.color = palette.ink3;
         label.textContent = stop.label;
         popup.append(heading, label);
         if (stop.code) {
@@ -143,7 +144,7 @@ export default function RouteMap({
           code.style.margin = "4px 0 0";
           code.style.fontSize = "11px";
           code.style.fontFamily = "monospace";
-          code.style.color = "#274442";
+          code.style.color = palette.ink2;
           code.textContent = stop.code;
           popup.appendChild(code);
         }
@@ -182,7 +183,7 @@ export default function RouteMap({
   if (stops.length === 0) {
     return (
       <div
-        className="flex items-center justify-center rounded-control border border-dashed bg-surface-muted px-6 text-center text-sm text-muted"
+        className="surface-light flex items-center justify-center rounded-control border border-dashed bg-surface px-6 text-center text-sm text-muted"
         style={{ height }}
       >
         {emptyMessage}
@@ -196,7 +197,7 @@ export default function RouteMap({
       {mapError ? (
         <div
           role="status"
-          className="absolute inset-0 z-[401] flex flex-col items-center justify-center gap-1 bg-surface-muted px-6 text-center"
+          className="surface-light absolute inset-0 z-[401] flex flex-col items-center justify-center gap-1 bg-surface px-6 text-center"
         >
           <p className="text-sm font-medium text-ink">Map unavailable</p>
           <p className="max-w-sm text-xs leading-5 text-muted">
@@ -204,7 +205,7 @@ export default function RouteMap({
           </p>
         </div>
       ) : null}
-      <div className="absolute bottom-2 left-2 z-[400] rounded bg-white/95 px-2 py-1 text-[10px] font-medium text-ink-2 shadow-sm">
+      <div className="surface-light absolute bottom-2 left-2 z-[400] rounded bg-surface/95 px-2 py-1 text-2xs font-medium text-ink-2 shadow-sm">
         {geometrySource === "osrm" ? "Road route · OSRM" : "Illustrative connectors — estimated, not road navigation"}
       </div>
     </div>

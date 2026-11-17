@@ -25,7 +25,7 @@ export function PageHeader({
           </Link>
         ) : null}
         {eyebrow ? <p className="eyebrow mb-2">{eyebrow}</p> : null}
-        <h1 className="text-[28px] font-bold leading-tight sm:text-[34px]">{title}</h1>
+        <h1 className="text-3xl font-bold leading-tight sm:text-4xl">{title}</h1>
         {description ? (
           <p className="mt-2 max-w-2xl text-sm leading-6 text-muted">{description}</p>
         ) : null}
@@ -83,16 +83,16 @@ export function StatCard({
   tone?: "default" | "accent" | "amber" | "red" | "blue";
 }) {
   const toneClass = {
-    default: "bg-surface-muted text-ink-2",
+    default: "bg-surface-tint text-ink-2",
     accent: "bg-accent-soft text-accent-strong",
-    amber: "bg-amber-soft text-[#8a5a12]",
-    red: "bg-red-soft text-[#8c2f2f]",
-    blue: "bg-blue-soft text-[#1d5580]",
+    amber: "bg-amber-soft text-amber-ink",
+    red: "bg-red-soft text-red-ink",
+    blue: "bg-blue-soft text-blue-ink",
   }[tone];
   return (
     <div className="card card-pad">
       <div className="flex items-start justify-between gap-3">
-        <p className="text-[12px] font-medium uppercase tracking-wider text-muted">{label}</p>
+        <p className="text-xs font-medium uppercase tracking-wider text-muted">{label}</p>
         {icon ? <span className={cn("rounded-lg p-1.5", toneClass)}>{icon}</span> : null}
       </div>
       <p className="stat-value mt-3">{value}</p>
@@ -113,7 +113,7 @@ export function EmptyState({
   action?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col items-center justify-center rounded-card border border-dashed bg-surface px-6 py-12 text-center">
+    <div className="panel flex flex-col items-center justify-center rounded-card border border-dashed px-6 py-12 text-center">
       {icon ? (
         <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-full bg-accent-soft text-accent-strong">
           {icon}
@@ -136,11 +136,11 @@ export function Callout({
   children: ReactNode;
 }) {
   const classes = {
-    neutral: "border-line bg-surface-muted text-ink-2",
-    accent: "border-[#c3e9da] bg-accent-soft text-accent-strong",
-    warning: "border-[#f3ddb3] bg-amber-soft text-[#7a4d0d]",
-    info: "border-[#cfe4f3] bg-blue-soft text-[#1d5580]",
-    danger: "border-[#f3d1cb] bg-red-soft text-[#8c2f2f]",
+    neutral: "border-line bg-surface-tint text-ink-2",
+    accent: "border-accent-border bg-accent-soft text-accent-strong",
+    warning: "border-amber-border bg-amber-soft text-amber-ink",
+    info: "border-blue-border bg-blue-soft text-blue-ink",
+    danger: "border-red-border bg-red-soft text-red-ink",
   }[tone];
   return (
     <div className={cn("rounded-control border px-4 py-3 text-sm leading-6", classes)}>
@@ -213,12 +213,12 @@ export function CapacityBar({
         </span>
       </div>
       <div
-        className="h-2 overflow-hidden rounded-full bg-surface-muted"
+        className="h-2 overflow-hidden rounded-full bg-surface-tint"
         role="img"
         aria-label={`${label}: ${pct}% of vehicle capacity used`}
       >
         <div
-          className={cn("h-full rounded-full", pct > 90 ? "bg-[#b74444]" : pct > 65 ? "bg-[#e8a33c]" : "bg-accent")}
+          className={cn("h-full rounded-full", pct > 90 ? "bg-red" : pct > 65 ? "bg-amber" : "bg-accent")}
           style={{ width: `${pct}%` }}
         />
       </div>
@@ -227,7 +227,7 @@ export function CapacityBar({
 }
 
 export function Mono({ children, className }: { children: ReactNode; className?: string }) {
-  return <span className={cn("mono text-[12px]", className)}>{children}</span>;
+  return <span className={cn("mono text-xs", className)}>{children}</span>;
 }
 
 export function RouteLine({ className }: { className?: string }) {

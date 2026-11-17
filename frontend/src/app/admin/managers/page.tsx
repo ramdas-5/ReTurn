@@ -17,7 +17,7 @@ export default function AdminManagersPage() {
     <div>
       <PageHeader eyebrow="Manager management" title="Operations managers" description="Managers are provisioned by administrators and scoped to service areas." actions={<Link href="/admin/accounts/new" className="btn btn-primary">Create manager</Link>} />
       {isLoading ? <p className="text-sm text-muted">Loading managers…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="table-wrap">
         <div className="table-scroll">
           <table className="data-table">
@@ -26,7 +26,7 @@ export default function AdminManagersPage() {
               {data?.data.map((row) => (
                 <tr key={row.id}>
                   <td><p className="font-medium">{row.full_name}</p><p className="text-xs text-muted">{row.email} · {row.phone ?? "—"}</p></td>
-                  <td className="text-[13px]">{row.manager_profile?.service_areas?.map((area: { name: string }) => area.name).join(", ") || "—"}</td>
+                  <td className="text-sm">{row.manager_profile?.service_areas?.map((area: { name: string }) => area.name).join(", ") || "—"}</td>
                   <td>{row.assigned_orders}</td>
                   <td>{row.managed_batches}</td>
                   <td><span className={`chip ${row.status === "active" ? "chip-green" : "chip-amber"}`}>{row.status}</span></td>

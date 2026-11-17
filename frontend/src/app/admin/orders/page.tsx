@@ -32,7 +32,7 @@ export default function AdminOrdersPage() {
         <input className="input !w-auto" placeholder="Search order number" value={q} onChange={(event) => setQ(event.target.value)} />
       </div>
       {isLoading ? <p className="text-sm text-muted">Loading orders…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? <OrderList orders={data.data} hrefBase="/admin/orders" showConsumer /> : null}
     </div>
   );

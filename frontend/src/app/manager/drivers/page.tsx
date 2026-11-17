@@ -77,7 +77,7 @@ export default function ManagerDriversPage() {
               <div><p className="font-semibold">{row.driver.full_name}</p><p className="text-xs text-muted">{row.driver.email}</p></div>
               <span className={`chip ${row.is_live ? "chip-green" : "chip-neutral"}`}>{row.duty_label}</span>
             </div>
-            <p className="mt-2 text-[13px] text-muted">{row.profile?.verification_status.replaceAll("_", " ") ?? "No profile"} · {row.profile?.completed_deliveries ?? 0} deliveries</p>
+            <p className="mt-2 text-sm text-muted">{row.profile?.verification_status.replaceAll("_", " ") ?? "No profile"} · {row.profile?.completed_deliveries ?? 0} deliveries</p>
             <p className="mt-1 text-xs text-muted">{row.active_batch ? `Batch ${row.active_batch.batch_number}` : "No active batch"}</p>
             <p className="mt-1 text-xs text-muted">{row.last_location ? `${row.last_location.status_label} · ${formatDateTime(row.last_location.received_at)}` : "Tracking unavailable"}</p>
           </Card>

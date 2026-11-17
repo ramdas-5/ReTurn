@@ -26,7 +26,7 @@ export default function ManagerLivePage() {
     <div>
       <PageHeader eyebrow="Live operations" title="Drivers on duty" description="Only the latest reported on-duty location is shown. “Tracking unavailable” and stale readings are labelled honestly — ReTurn does not invent GPS." />
       {isLoading ? <p className="text-sm text-muted">Loading live drivers…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data?.data.map((row) => (
           <article key={row.driver.id} className="card card-pad">

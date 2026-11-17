@@ -19,7 +19,7 @@ export default function DriverBatchPage() {
   });
 
   if (isLoading) return <p className="text-sm text-muted">Loading batch…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
   const plan = data.route_plan;
   const stops = plan?.stops ?? [];
@@ -53,7 +53,7 @@ export default function DriverBatchPage() {
               <div>
                 <p className="text-xs uppercase tracking-wide text-muted">Stop {stop.sequence} · {stop.kind}</p>
                 <p className="mt-1 font-semibold">{stop.order?.order_number ?? stop.label}</p>
-                <p className="text-[13px] text-muted">{stop.address.address_line}, {stop.address.area}</p>
+                <p className="text-sm text-muted">{stop.address.address_line}, {stop.address.area}</p>
                 <p className="mt-1 text-xs text-muted">{formatDateTime(stop.planned_arrival)}</p>
                 {stop.order?.id ? <Link href={`/driver/assignments/${stop.order.id}`} className="link mt-1 inline-block text-xs">Open order</Link> : null}
               </div>

@@ -19,7 +19,7 @@ export default function ManagerBatchesPage() {
     <div>
       <PageHeader eyebrow="Batches & route management" title="Shared routes" description="A batch is built only when capacity, windows, handling and service areas are compatible." actions={<Link href="/manager/batches/new" className="btn btn-primary">Create batch</Link>} />
       {isLoading ? <p className="text-sm text-muted">Loading batches…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2">
         {data?.data.map((batch) => (
           <Link key={batch.id} href={`/manager/batches/${batch.id}`} className="card card-pad hover:border-accent/50">
@@ -27,7 +27,7 @@ export default function ManagerBatchesPage() {
               <div><p className="font-bold">{batch.batch_number}</p><p className="text-sm text-muted">{batch.driver?.full_name ?? "No driver"} · {batch.order_count} orders</p></div>
               <StatusBadge status={batch.status} />
             </div>
-            <p className="mt-3 text-[13px] text-muted">{formatDateTime(batch.planned_start)} · {formatKm(batch.distance_km)} · {batch.completed_stops}/{batch.total_stops} stops</p>
+            <p className="mt-3 text-sm text-muted">{formatDateTime(batch.planned_start)} · {formatKm(batch.distance_km)} · {batch.completed_stops}/{batch.total_stops} stops</p>
             <p className="mt-1 text-xs text-muted">Distance basis: {batch.distance_source}</p>
           </Link>
         ))}

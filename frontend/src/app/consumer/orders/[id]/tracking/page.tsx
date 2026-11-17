@@ -20,7 +20,7 @@ export default function TrackingPage() {
   return (
     <div className="mx-auto max-w-3xl">
       <PageHeader eyebrow="Parcel tracking" title={data?.order_number ?? "Tracking"} description="Every status change is recorded by the platform, not simulated in the browser." back={{ href: `/consumer/orders/${params.id}`, label: "Order details" }} actions={data ? <StatusBadge status={data.status} /> : null} />
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? (
         <div className="space-y-5">
           <Card>

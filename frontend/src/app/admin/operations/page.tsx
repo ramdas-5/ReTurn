@@ -27,7 +27,7 @@ export default function AdminOperationsPage() {
     <div>
       <PageHeader eyebrow="Global live operations" title="Duty, tracking and active work" description="Only reported locations are shown, labelled live recent, stale or unavailable. Nothing is interpolated." actions={<Link href="/admin/routes" className="btn btn-secondary">Route monitor</Link>} />
       {isLoading ? <p className="text-sm text-muted">Loading operations…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">

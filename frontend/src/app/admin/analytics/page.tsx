@@ -30,7 +30,7 @@ export default function AdminAnalyticsPage() {
     <div>
       <PageHeader eyebrow="Reports & sustainability" title="Platform analytics" description="Operational counts come from stored rows. Distance, fuel and CO₂e are modelled estimates with visible factors and methodology." />
       {analytics.isLoading ? <p className="text-sm text-muted">Loading analytics…</p> : null}
-      {analytics.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(analytics.error as Error).message}</p> : null}
+      {analytics.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(analytics.error as Error).message}</p> : null}
       {data ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

@@ -18,7 +18,7 @@ export default function ManagerProofsPage() {
     <div>
       <PageHeader eyebrow="Proof verification" title="Pickup and delivery evidence" description="Review captured proof from orders in your service areas. Verification never rewrites history: it records who reviewed what." />
       {isLoading ? <p className="text-sm text-muted">Loading proofs…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data?.data.map((proof) => (
           <article key={proof.id} className="card card-pad">

@@ -29,7 +29,7 @@ export default function ConsumerOrderDetailPage() {
   });
 
   if (isLoading) return <p className="text-sm text-muted">Loading order…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
 
   return (
@@ -53,25 +53,25 @@ export default function ConsumerOrderDetailPage() {
               <div>
                 <p className="eyebrow">Pickup</p>
                 <p className="mt-1 text-sm font-semibold">{data.pickup_address?.contact_name}</p>
-                <p className="text-[13px] leading-5 text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p>
+                <p className="text-sm leading-5 text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p>
                 <p className="mt-1 text-xs text-muted">{formatWindow(data.pickup.window_start, data.pickup.window_end)}</p>
               </div>
               <div>
                 <p className="eyebrow">Delivery</p>
                 <p className="mt-1 text-sm font-semibold">{data.delivery_address?.contact_name}</p>
-                <p className="text-[13px] leading-5 text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p>
+                <p className="text-sm leading-5 text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p>
                 <p className="mt-1 text-xs text-muted">Deadline {formatDateTime(data.delivery.deadline)}</p>
               </div>
             </div>
             <div className="divider" />
-            <div className="flex flex-wrap gap-x-8 gap-y-3 text-[13px]">
+            <div className="flex flex-wrap gap-x-8 gap-y-3 text-sm">
               <span><Package size={14} className="mr-1 inline" aria-hidden /> {data.parcel.name}</span>
               <span>{formatWeight(data.parcel.weight_kg)}</span>
               <span>{data.parcel.is_fragile ? "Fragile" : "Standard handling"}</span>
-              {data.parcel.photo_exception_reason ? <span className="text-[#8a5a12]">Photo exception recorded</span> : null}
+              {data.parcel.photo_exception_reason ? <span className="text-amber-ink">Photo exception recorded</span> : null}
             </div>
             {data.return_request ? (
-              <div className="mt-4 rounded-control bg-surface-muted p-3 text-[13px]">
+              <div className="mt-4 rounded-control bg-surface-tint p-3 text-sm">
                 <p className="font-semibold">Return: {data.return_request.product_name}</p>
                 <p className="text-muted">{data.return_request.reason}</p>
                 <p className="mt-1 text-xs text-muted">Destination: {data.return_request.merchant_name ?? data.return_request.destination_type}</p>
@@ -110,7 +110,7 @@ export default function ConsumerOrderDetailPage() {
               <p className="mt-2 text-sm text-muted">No driver assigned yet. A manager will review and assign compatible work.</p>
             )}
             {data.batch ? (
-              <div className="mt-4 rounded-control bg-surface-muted p-3 text-[13px]">
+              <div className="mt-4 rounded-control bg-surface-tint p-3 text-sm">
                 <p className="font-medium">{data.batch.batch_number}</p>
                 <p className="text-muted">{data.batch.status_label}</p>
                 {data.assignment?.driver?.phone ? <a className="link mt-2 inline-block text-xs" href={`tel:${data.assignment.driver.phone}`}>Call driver</a> : null}

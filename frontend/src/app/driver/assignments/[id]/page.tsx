@@ -20,7 +20,7 @@ export default function DriverStopPage() {
   });
 
   if (isLoading) return <p className="text-sm text-muted">Loading stop…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
 
   return (
@@ -39,20 +39,20 @@ export default function DriverStopPage() {
               <div>
                 <p className="eyebrow">Pickup</p>
                 <p className="mt-1 text-sm font-semibold">{data.pickup_address?.contact_name} · {data.pickup_address?.contact_phone}</p>
-                <p className="text-[13px] text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p>
+                <p className="text-sm text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p>
                 <p className="mt-1 text-xs text-muted">{formatWindow(data.pickup.window_start, data.pickup.window_end)}</p>
                 {data.pickup_address?.latitude ? <a className="link mt-2 inline-flex items-center gap-1 text-xs" href={`https://www.google.com/maps/dir/?api=1&destination=${data.pickup_address.latitude},${data.pickup_address.longitude}`} target="_blank" rel="noreferrer"><Navigation size={13} aria-hidden /> Navigate to pickup</a> : null}
               </div>
               <div>
                 <p className="eyebrow">Delivery</p>
                 <p className="mt-1 text-sm font-semibold">{data.delivery_address?.contact_name} · {data.delivery_address?.contact_phone}</p>
-                <p className="text-[13px] text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p>
+                <p className="text-sm text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p>
                 <p className="mt-1 text-xs text-muted">Deadline {formatDateTime(data.delivery.deadline)}</p>
                 {data.delivery_address?.latitude ? <a className="link mt-2 inline-flex items-center gap-1 text-xs" href={`https://www.google.com/maps/dir/?api=1&destination=${data.delivery_address.latitude},${data.delivery_address.longitude}`} target="_blank" rel="noreferrer"><MapPin size={13} aria-hidden /> Navigate to delivery</a> : null}
               </div>
             </div>
             <div className="divider" />
-            <p className="flex flex-wrap gap-4 text-[13px]">
+            <p className="flex flex-wrap gap-4 text-sm">
               <span className="inline-flex items-center gap-1"><Package size={14} aria-hidden /> {data.parcel.name}</span>
               <span>{formatWeight(data.parcel.weight_kg)}</span>
               <span>{data.parcel.is_fragile ? "Fragile" : "Standard"}</span>

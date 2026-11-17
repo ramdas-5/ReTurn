@@ -58,7 +58,7 @@ export default function AvailabilityPage() {
         </div>
         <Button busy={busy} type="submit">Check availability</Button>
       </form>
-      {error ? <p className="mt-4 rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{error}</p> : null}
+      {error ? <p className="mt-4 rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{error}</p> : null}
       {result ? (
         <Card className="mt-4">
           <p className={`chip ${result.serviceable ? "chip-teal" : "chip-red"}`}>{result.availability_label}</p>
@@ -68,7 +68,7 @@ export default function AvailabilityPage() {
             <p>Drivers on duty: {result.drivers_on_duty}</p>
             <p>Drivers scheduled: {result.drivers_scheduled}</p>
           </div>
-          {result.reasons.length ? <p className="mt-3 text-sm text-[#8a5a12]">Reasons: {result.reasons.join(", ")}</p> : null}
+          {result.reasons.length ? <p className="mt-3 text-sm text-amber-ink">Reasons: {result.reasons.join(", ")}</p> : null}
           <p className="mt-4 text-xs leading-5 text-muted">{result.disclaimer}</p>
         </Card>
       ) : null}

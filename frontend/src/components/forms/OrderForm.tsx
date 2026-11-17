@@ -143,7 +143,7 @@ export default function OrderForm({ serviceType }: { serviceType: "parcel" | "re
   return (
     <form onSubmit={submit} className="space-y-5">
       {error ? (
-        <p className="rounded-control border border-[#f3d1cb] bg-red-soft px-3 py-2 text-sm text-[#8c2f2f]" role="alert">
+        <p className="rounded-control border border-red-border bg-red-soft px-3 py-2 text-sm text-red-ink" role="alert">
           {error}
         </p>
       ) : null}
@@ -233,7 +233,7 @@ export default function OrderForm({ serviceType }: { serviceType: "parcel" | "re
           <Field label="Delivery deadline" className="sm:col-span-2"><input name="deadline" type="datetime-local" className="input" defaultValue={initial.replace(/T\d{2}/, "T21")} required /></Field>
           <Field label="Service notes" className="sm:col-span-2"><textarea name="service_notes" className="input" rows={2} /></Field>
         </div>
-        <div className="mt-4 rounded-control border bg-surface-muted p-4">
+        <div className="mt-4 rounded-control border bg-surface-tint p-4">
           <label className="label" htmlFor="photo">Exterior parcel photograph</label>
           <input
             id="photo"

@@ -20,7 +20,7 @@ export default function ManagerOrderPage() {
   });
 
   if (isLoading) return <p className="text-sm text-muted">Loading order…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
 
   return (
@@ -31,12 +31,12 @@ export default function ManagerOrderPage() {
           <Card>
             <div className="flex flex-wrap items-center gap-2"><ServiceBadge type={data.service_type} /><span className="text-xs text-muted">Created {formatDateTime(data.created_at)}</span>{data.consumer ? <span className="chip chip-neutral">{data.consumer.full_name}</span> : null}</div>
             <div className="mt-4 grid gap-5 sm:grid-cols-2">
-              <div><p className="eyebrow">Pickup</p><p className="mt-1 text-sm font-semibold">{data.pickup_address?.contact_name} · {data.pickup_address?.contact_phone}</p><p className="text-[13px] text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p><p className="mt-1 text-xs text-muted">{formatWindow(data.pickup.window_start, data.pickup.window_end)}</p></div>
-              <div><p className="eyebrow">Delivery</p><p className="mt-1 text-sm font-semibold">{data.delivery_address?.contact_name} · {data.delivery_address?.contact_phone}</p><p className="text-[13px] text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p><p className="mt-1 text-xs text-muted">Deadline {formatDateTime(data.delivery.deadline)}</p></div>
+              <div><p className="eyebrow">Pickup</p><p className="mt-1 text-sm font-semibold">{data.pickup_address?.contact_name} · {data.pickup_address?.contact_phone}</p><p className="text-sm text-muted">{data.pickup_address?.address_line}, {data.pickup_address?.area}</p><p className="mt-1 text-xs text-muted">{formatWindow(data.pickup.window_start, data.pickup.window_end)}</p></div>
+              <div><p className="eyebrow">Delivery</p><p className="mt-1 text-sm font-semibold">{data.delivery_address?.contact_name} · {data.delivery_address?.contact_phone}</p><p className="text-sm text-muted">{data.delivery_address?.address_line}, {data.delivery_address?.area}</p><p className="mt-1 text-xs text-muted">Deadline {formatDateTime(data.delivery.deadline)}</p></div>
             </div>
             <div className="divider" />
-            <p className="text-[13px]">{data.parcel.name} · {data.parcel.quantity} × {formatWeight(data.parcel.weight_kg)} · {data.parcel.is_fragile ? "fragile" : "standard"}</p>
-            {data.return_request ? <p className="mt-2 rounded-control bg-surface-muted p-2 text-xs">Return to {data.return_request.merchant_name ?? data.return_request.destination_type} · {data.return_request.reason}</p> : null}
+            <p className="text-sm">{data.parcel.name} · {data.parcel.quantity} × {formatWeight(data.parcel.weight_kg)} · {data.parcel.is_fragile ? "fragile" : "standard"}</p>
+            {data.return_request ? <p className="mt-2 rounded-control bg-surface-tint p-2 text-xs">Return to {data.return_request.merchant_name ?? data.return_request.destination_type} · {data.return_request.reason}</p> : null}
             {data.service_notes ? <p className="mt-2 text-sm text-muted">Notes: {data.service_notes}</p> : null}
             {data.batch ? <p className="mt-2 text-sm">Batch: <Link href={`/manager/batches/${data.batch.id}`} className="link">{data.batch.batch_number}</Link> ({data.batch.status_label})</p> : null}
           </Card>

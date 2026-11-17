@@ -35,14 +35,14 @@ export default function ConsumerOrdersPage() {
             {value || "All"}
           </button>
         ))}
-        <select className="input !w-auto !py-1.5 text-[13px]" value={service} onChange={(event) => setService(event.target.value)}>
+        <select className="input !w-auto !py-1.5 text-sm" value={service} onChange={(event) => setService(event.target.value)}>
           <option value="">All services</option>
           <option value="parcel">Parcels</option>
           <option value="return">Returns</option>
         </select>
       </div>
       {isLoading ? <p className="text-sm text-muted">Loading orders…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? <OrderList orders={data.data} hrefBase="/consumer/orders" emptyTitle="No orders in this view" emptyDescription="Try another filter or create a new request." /> : null}
     </div>
   );

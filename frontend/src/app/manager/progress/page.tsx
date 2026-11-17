@@ -23,7 +23,7 @@ export default function ManagerProgressPage() {
                 <Link href={`/manager/batches/${batch.id}`} className="font-semibold text-accent hover:underline">{batch.batch_number}</Link>
                 <StatusBadge status={batch.status} />
               </div>
-              <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-muted"><div className="h-full bg-accent" style={{ width: `${pct}%` }} /></div>
+              <div className="mt-3 h-2 overflow-hidden rounded-full bg-surface-tint"><div className="h-full bg-accent" style={{ width: `${pct}%` }} /></div>
               <p className="mt-1 text-xs text-muted">{batch.completed_stops} of {batch.total_stops} stops complete ({pct}%)</p>
             </div>
           );

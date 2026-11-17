@@ -31,7 +31,7 @@ export default function ConsumerDashboard() {
       />
 
       {isLoading ? <p className="text-sm text-muted">Loading your dashboard…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
 
       {data ? (
         <>
@@ -63,9 +63,9 @@ export default function ConsumerDashboard() {
                   <ul className="mt-3 space-y-3">
                     {data.notifications.latest.map((item) => (
                       <li key={item.id} className="border-b pb-3 last:border-0 last:pb-0">
-                        <p className="text-[13px] font-semibold">{item.title}</p>
+                        <p className="text-sm font-semibold">{item.title}</p>
                         <p className="mt-0.5 text-xs leading-5 text-muted">{item.body}</p>
-                        <p className="mt-1 text-[10px] uppercase tracking-wide text-muted">{relativeTime(item.created_at)}</p>
+                        <p className="mt-1 text-2xs uppercase tracking-wide text-muted">{relativeTime(item.created_at)}</p>
                       </li>
                     ))}
                   </ul>

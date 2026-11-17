@@ -14,7 +14,7 @@ export default function AdminProofsPage() {
     <div>
       <PageHeader eyebrow="Delivery proof audit" title="Platform-wide evidence" description="Every pickup and delivery proof, with its reviewer trail. An administrator review cannot fabricate a delivery; it only records verification." />
       {isLoading ? <p className="text-sm text-muted">Loading proofs…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data?.data.map((proof) => (
           <article key={proof.id} className="card card-pad">

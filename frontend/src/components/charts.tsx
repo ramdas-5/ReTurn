@@ -14,7 +14,7 @@ import {
   YAxis,
 } from "recharts";
 
-const SERIES_COLOURS = ["#10B981", "#14B8A6", "#0D1B2A", "#F59E0B", "#EF4444", "#64748B"];
+import { chartAxis, chartSeries, palette } from "@/lib/design-tokens";
 
 export type ChartDatum = { label: string; value: number };
 
@@ -27,16 +27,16 @@ export function CountBarChart({ data }: { data: ChartDatum[] }) {
     <div className="h-[260px] w-full" role="img" aria-label="Bar chart of counts by category">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={data} layout="vertical" margin={{ top: 4, right: 16, bottom: 4, left: 8 }}>
-          <CartesianGrid horizontal={false} stroke="#e2e8f0" />
-          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: "#64748b" }} />
+          <CartesianGrid horizontal={false} stroke={chartAxis.grid} />
+          <XAxis type="number" allowDecimals={false} tick={{ fontSize: 11, fill: chartAxis.tick }} />
           <YAxis
             type="category"
             dataKey="label"
             width={132}
-            tick={{ fontSize: 11, fill: "#334155" }}
+            tick={{ fontSize: 11, fill: chartAxis.tickStrong }}
           />
-          <Tooltip cursor={{ fill: "#f1f5f9" }} />
-          <Bar dataKey="value" fill="#10B981" radius={[0, 4, 4, 0]} name="Count" />
+          <Tooltip cursor={{ fill: chartAxis.cursor }} />
+          <Bar dataKey="value" fill={palette.accent} radius={[0, 4, 4, 0]} name="Count" />
         </BarChart>
       </ResponsiveContainer>
     </div>
@@ -61,7 +61,7 @@ export function SharePieChart({ data }: { data: ChartDatum[] }) {
             paddingAngle={2}
           >
             {data.map((row, index) => (
-              <Cell key={row.label} fill={SERIES_COLOURS[index % SERIES_COLOURS.length]} />
+              <Cell key={row.label} fill={chartSeries[index % chartSeries.length]} />
             ))}
           </Pie>
           <Legend />
@@ -71,3 +71,4 @@ export function SharePieChart({ data }: { data: ChartDatum[] }) {
     </div>
   );
 }
+

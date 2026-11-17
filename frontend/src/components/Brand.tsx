@@ -33,14 +33,14 @@ export function Brand({
     <Link
       href={href}
       className={cn(
-        "inline-flex items-center gap-2.5 font-display text-[22px] font-bold tracking-tight",
+        "inline-flex items-center gap-2.5 font-display text-2xl font-bold tracking-tight",
         invert ? "text-white" : "text-ink",
       )}
       aria-label="ReTurn home"
     >
-      <RouteMark className={cn(compact ? "h-8 w-8" : "h-9 w-9", invert ? "text-lime" : "text-accent")} />
+      <RouteMark className={cn(compact ? "h-8 w-8" : "h-9 w-9", "text-danger")} />
       <span>
-        Re<span className={invert ? "text-lime" : "text-accent"}>Turn</span>
+        Re<span className="text-danger">Turn</span>
       </span>
     </Link>
   );

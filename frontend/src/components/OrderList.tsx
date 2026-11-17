@@ -50,12 +50,12 @@ export default function OrderList({
                   ) : null}
                 </td>
                 <td>
-                  <p className="text-[13px] font-medium">{order.pickup.area ?? "—"}</p>
+                  <p className="text-sm font-medium">{order.pickup.area ?? "—"}</p>
                   <p className="text-xs text-muted">→ {order.delivery.area ?? "—"}</p>
                 </td>
-                <td className="text-[13px]">{formatWindow(order.pickup.window_start, order.pickup.window_end)}</td>
+                <td className="text-sm">{formatWindow(order.pickup.window_start, order.pickup.window_end)}</td>
                 <td><StatusBadge status={order.status} /></td>
-                <td className="text-[13px]">{formatDateTime(order.delivery.deadline)}</td>
+                <td className="text-sm">{formatDateTime(order.delivery.deadline)}</td>
               </tr>
             ))}
           </tbody>

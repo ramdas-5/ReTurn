@@ -21,7 +21,7 @@ export default function ConfirmationPage() {
   return (
     <div className="mx-auto max-w-2xl">
       <PageHeader eyebrow="Order received" title="Your request is with the operations team" description="No driver is committed yet. A manager will review feasibility and assign compatible work." />
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? (
         <Card className="card-pad">
           <div className="flex items-start gap-3">

@@ -25,7 +25,7 @@ export default function AdminDashboard() {
         actions={<><Link href="/admin/analytics" className="btn btn-secondary">Analytics</Link><Link href="/admin/operations" className="btn btn-primary">Live operations</Link></>}
       />
       {summary.isLoading ? <p className="text-sm text-muted">Loading platform summary…</p> : null}
-      {summary.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(summary.error as Error).message}</p> : null}
+      {summary.error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(summary.error as Error).message}</p> : null}
       {data ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -49,7 +49,7 @@ export default function AdminDashboard() {
               <div className="mb-3 flex items-center justify-between"><h2 className="section-title">Audit trail</h2><Link href="/admin/audit" className="link text-sm">Full log</Link></div>
               <div className="card">
                 <ul className="divide-y">
-                  {audit.data?.data.map((row) => <li key={row.id} className="px-4 py-3"><p className="text-[13px] font-medium">{row.summary}</p><p className="mt-1 text-[11px] text-muted">{row.action} · {row.actor?.full_name ?? "System"}</p></li>)}
+                  {audit.data?.data.map((row) => <li key={row.id} className="px-4 py-3"><p className="text-sm font-medium">{row.summary}</p><p className="mt-1 text-2xs text-muted">{row.action} · {row.actor?.full_name ?? "System"}</p></li>)}
                   {audit.data && audit.data.data.length === 0 ? <li className="px-4 py-4 text-sm text-muted">No audit entries yet.</li> : null}
                 </ul>
               </div>

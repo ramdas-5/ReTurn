@@ -26,7 +26,7 @@ export default function AdminDriversPage() {
     <div>
       <PageHeader eyebrow="Driver management" title="Drivers and verification" description="Driver accounts are never self-registered. Verification changes are audited." actions={<Link href="/admin/accounts/new" className="btn btn-primary">Create driver</Link>} />
       {isLoading ? <p className="text-sm text-muted">Loading drivers…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2">
         {data?.data.map((row) => (
           <article key={row.user.id} className="card card-pad">
@@ -34,7 +34,7 @@ export default function AdminDriversPage() {
               <div><p className="font-semibold">{row.user.full_name}</p><p className="text-xs text-muted">{row.user.email} · {row.user.phone}</p></div>
               <span className={`chip ${row.verification_status === "verified" ? "chip-green" : row.verification_status === "rejected" ? "chip-red" : "chip-amber"}`}>{row.verification_status.replaceAll("_", " ")}</span>
             </div>
-            <p className="mt-2 text-[13px] text-muted">Duty {row.duty_status} · {row.completed_deliveries} completed · {row.active_assignments} active assignments</p>
+            <p className="mt-2 text-sm text-muted">Duty {row.duty_status} · {row.completed_deliveries} completed · {row.active_assignments} active assignments</p>
             <p className="mt-1 text-xs text-muted">{row.vehicles.map((vehicle) => `${vehicle.vehicle_type} ${vehicle.registration_number}`).join(", ") || "No vehicles"}</p>
             <p className="mt-1 text-xs text-muted">{row.service_areas?.map((area) => area.name).join(", ") || "No service areas"}</p>
             {row.verification_status !== "verified" ? <DriverVerificationActions userId={row.user.id} /> : null}

@@ -65,7 +65,7 @@ export default function DriverVehiclePage() {
               <span className={`chip ${vehicle.verification_status === "verified" ? "chip-green" : "chip-amber"}`}>{vehicle.verification_status.replaceAll("_", " ")}</span>
             </div>
             {vehicle.capacity ? (
-              <p className="rounded-control bg-surface-muted p-3 text-xs leading-5 text-muted">
+              <p className="rounded-control bg-surface-tint p-3 text-xs leading-5 text-muted">
                 Max {vehicle.capacity.max_weight_kg} kg · {vehicle.capacity.max_volume_m3} m³ · {vehicle.capacity.max_parcels} parcels ·
                 {" "}{vehicle.capacity.supports_fragile ? "fragile allowed" : "no fragile"} · {vehicle.is_active ? "active" : "inactive"}
               </p>

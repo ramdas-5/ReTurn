@@ -24,7 +24,7 @@ export default function ConsumerHistoryPage() {
         <StatCard label="Parcels completed" value={orders.filter((order) => order.service_type === "parcel").length} />
       </div>
       {isLoading ? <p className="text-sm text-muted">Loading history…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? <OrderList orders={orders} hrefBase="/consumer/orders" emptyTitle="No completed orders yet" emptyDescription="Completed deliveries and returns will be kept here." /> : null}
     </div>
   );

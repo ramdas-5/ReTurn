@@ -44,7 +44,7 @@ export default function ForgotPasswordPage() {
       </form>
       {message ? <p className="mt-4 text-sm text-muted">{message}</p> : null}
       {token ? (
-        <div className="mt-3 rounded-control border bg-surface-muted p-3 text-xs">
+        <div className="mt-3 rounded-control border bg-surface-tint p-3 text-xs">
           <p className="font-semibold">Development reset token</p>
           <p className="mono mt-1 break-all">{token}</p>
           <Link className="link mt-2 inline-block" href={`/auth/reset?token=${encodeURIComponent(token)}`}>Continue to reset</Link>

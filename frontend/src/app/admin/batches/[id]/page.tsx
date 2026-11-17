@@ -15,7 +15,7 @@ export default function AdminBatchDetailPage() {
   const params = useParams<{ id: string }>();
   const { data, isLoading, error } = useQuery({ queryKey: ["admin-batch", params.id], queryFn: () => apiGet<BatchDetail>(`/admin/batches/${params.id}`) });
   if (isLoading) return <p className="text-sm text-muted">Loading batch…</p>;
-  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p>;
+  if (error) return <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p>;
   if (!data) return null;
   const stops = data.route_plan?.stops ?? [];
   return (
@@ -27,7 +27,7 @@ export default function AdminBatchDetailPage() {
           <p className="mt-2 text-xs text-muted">Route source {data.distance_source} · algorithm {data.algorithm}.</p>
         </Card>
         <div className="space-y-4">
-          <Card><h2 className="section-title">Orders</h2><div className="mt-3 space-y-2">{data.orders.map((order) => <Link key={order.id} href={`/admin/orders/${order.id}`} className="flex items-center justify-between rounded-control border p-2 text-sm hover:bg-surface-muted"><span>{order.order_number}</span><StatusBadge status={order.status} /></Link>)}</div></Card>
+          <Card><h2 className="section-title">Orders</h2><div className="mt-3 space-y-2">{data.orders.map((order) => <Link key={order.id} href={`/admin/orders/${order.id}`} className="flex items-center justify-between rounded-control border p-2 text-sm hover:bg-surface-tint"><span>{order.order_number}</span><StatusBadge status={order.status} /></Link>)}</div></Card>
           <Card><h2 className="section-title">Stops</h2><ol className="mt-2 space-y-2 text-sm">{stops.map((stop) => <li key={stop.id} className="border-b pb-2 last:border-0">{stop.sequence}. {stop.kind} · {stop.address.area}<span className="block text-xs text-muted">{formatDateTime(stop.planned_arrival)} · {stop.status}</span></li>)}</ol></Card>
         </div>
       </div>

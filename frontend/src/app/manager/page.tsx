@@ -24,7 +24,7 @@ export default function ManagerDashboard() {
         actions={<><Link href="/manager/orders" className="btn btn-primary">Order queue</Link><Link href="/manager/matching" className="btn btn-secondary">Smart matching</Link></>}
       />
       {isLoading ? <p className="text-sm text-muted">Loading operations summary…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? (
         <>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">

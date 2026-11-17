@@ -16,7 +16,7 @@ export default function AdminVehiclesPage() {
     <div>
       <PageHeader eyebrow="Fleet management" title="Vehicles and capacity" description="Capacity limits come from the configured vehicle profile. Verification controls whether dispatch may assign the vehicle." />
       {isLoading ? <p className="text-sm text-muted">Loading fleet…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
         {data?.data.map((row) => (
           <article key={row.id} className="card card-pad">

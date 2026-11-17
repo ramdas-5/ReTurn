@@ -17,7 +17,7 @@ export default function DriverHistoryPage() {
     <div>
       <PageHeader eyebrow="Delivery history" title="Completed work" description="Orders you completed, including any recorded delivery proof." />
       {isLoading ? <p className="text-sm text-muted">Loading history…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       {data ? <OrderList orders={data.data} hrefBase="/driver/assignments" emptyTitle="No completed deliveries yet" emptyDescription="Completed stops will appear here." /> : null}
     </div>
   );

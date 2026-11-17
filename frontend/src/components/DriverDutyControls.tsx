@@ -117,7 +117,7 @@ export default function DriverDutyControls({ compact = false }: { compact?: bool
               <Square size={14} aria-hidden /> End duty
             </button>
           </div>
-          <form onSubmit={share} className="rounded-control border bg-surface-muted p-3">
+          <form onSubmit={share} className="rounded-control border bg-surface-tint p-3">
             <p className="text-sm font-medium flex items-center gap-1.5"><MapPin size={14} aria-hidden /> Share a location update</p>
             <p className="mt-1 text-xs text-muted">Only while on duty and with your explicit consent. The platform does not track you off duty.</p>
             <div className="mt-2 grid gap-2 sm:grid-cols-3">

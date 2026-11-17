@@ -8,7 +8,7 @@ export default function NotFound() {
       <Brand />
       <RouteMark className="mt-10 h-14 w-14 text-accent" />
       <p className="eyebrow mt-6">404 · Route not found</p>
-      <h1 className="mt-2 text-[32px] font-bold">This stop isn&apos;t on the map</h1>
+      <h1 className="mt-2 text-3xl font-bold">This stop isn&apos;t on the map</h1>
       <p className="mt-2 max-w-md text-sm leading-6 text-muted">
         The page or record may have moved, or your account may not have been intended for this link. Use a safe return
         path below.

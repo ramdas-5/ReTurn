@@ -65,7 +65,7 @@ export default function ManagerBatchPage() {
           <Card>
             <h2 className="section-title">Orders</h2>
             <div className="mt-3 space-y-2">
-              {data.orders.map((order) => <Link key={order.id} href={`/manager/orders/${order.id}`} className="flex items-center justify-between rounded-control border p-3 text-sm hover:bg-surface-muted"><span>{order.order_number} · {order.pickup.area} → {order.delivery.area}</span><StatusBadge status={order.status} /></Link>)}
+              {data.orders.map((order) => <Link key={order.id} href={`/manager/orders/${order.id}`} className="flex items-center justify-between rounded-control border p-3 text-sm hover:bg-surface-tint"><span>{order.order_number} · {order.pickup.area} → {order.delivery.area}</span><StatusBadge status={order.status} /></Link>)}
             </div>
           </Card>
         </div>

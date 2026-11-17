@@ -124,7 +124,7 @@ export default function ManagerOrderActions({
               <div key={suggestion.id} className="rounded-control border p-3">
                 <p className="text-sm font-semibold">{suggestion.driver?.full_name}</p>
                 <p className="text-xs text-muted">Detour {suggestion.detour_km?.toFixed(2)} km · score {suggestion.score?.toFixed(1) ?? "—"}</p>
-                <p className="mt-1 text-[11px] leading-5 text-muted">{suggestion.reasons.map((reason) => reason.label).join(" · ")}</p>
+                <p className="mt-1 text-2xs leading-5 text-muted">{suggestion.reasons.map((reason) => reason.label).join(" · ")}</p>
                 <div className="mt-2 flex gap-2">
                   <button className="btn btn-primary btn-sm" disabled={busy === `s-${suggestion.id}`} onClick={() => run(`s-${suggestion.id}`, `/manager/matching/suggestions/${suggestion.id}/approve`, {}, "Suggestion approved and order assigned.")}>Approve</button>
                   <button className="btn btn-secondary btn-sm" onClick={() => {

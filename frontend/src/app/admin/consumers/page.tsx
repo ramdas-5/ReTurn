@@ -21,7 +21,7 @@ export default function AdminConsumersPage() {
       <PageHeader eyebrow="Consumer management" title="Consumer accounts" description="Every consumer registered through the public form. Business profiles are listed separately." />
       <input className="input mb-4 max-w-sm" placeholder="Search name, email or phone" value={q} onChange={(event) => setQ(event.target.value)} />
       {isLoading ? <p className="text-sm text-muted">Loading consumers…</p> : null}
-      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-[#8c2f2f]">{(error as Error).message}</p> : null}
+      {error ? <p className="rounded-control bg-red-soft px-4 py-3 text-sm text-red-ink">{(error as Error).message}</p> : null}
       <div className="table-wrap">
         <div className="table-scroll">
           <table className="data-table">
@@ -30,9 +30,9 @@ export default function AdminConsumersPage() {
               {data?.data.map((user) => (
                 <tr key={user.id}>
                   <td><p className="font-medium">{user.full_name}</p><p className="text-xs text-muted">{user.email} · {user.phone ?? "—"}</p></td>
-                  <td className="text-[13px]">{user.consumer_profile?.account_type ?? "individual"}{user.business_profile ? ` · ${user.business_profile.business_name}` : ""}</td>
+                  <td className="text-sm">{user.consumer_profile?.account_type ?? "individual"}{user.business_profile ? ` · ${user.business_profile.business_name}` : ""}</td>
                   <td><span className={`chip ${user.status === "active" ? "chip-green" : "chip-amber"}`}>{user.status}</span></td>
-                  <td className="text-[13px]">{formatDateTime(user.created_at)}</td>
+                  <td className="text-sm">{formatDateTime(user.created_at)}</td>
                   <td><AccountStatusActions userId={user.id} status={user.status} /></td>
                 </tr>
               ))}

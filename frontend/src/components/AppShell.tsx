@@ -82,10 +82,13 @@ export default function AppShell({
 
   return (
     <div className="min-h-screen">
-      <aside className="fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-ink pb-5 pt-6 text-white lg:flex">
+      <a href="#main" className="skip-link">
+        Skip to content
+      </a>
+      <aside className="on-dark fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-canvas pb-5 pt-6 text-white lg:flex">
         <div className="px-4">
           <Brand href={home} invert />
-          <p className="mt-2 text-[11px] uppercase tracking-[0.16em] text-white/45">
+          <p className="mt-2 text-2xs uppercase tracking-[0.16em] text-white/70">
             {ROLE_LABEL[role]}
           </p>
         </div>
@@ -93,13 +96,13 @@ export default function AppShell({
           <div className="mt-4 space-y-2 px-3">
             <Link
               href="/consumer/parcels/new"
-              className="flex min-h-[42px] items-center justify-center rounded-control bg-lime px-3 text-[13px] font-semibold text-ink transition hover:brightness-95"
+              className="flex min-h-[42px] items-center justify-center rounded-control bg-lime px-3 text-sm font-semibold text-canvas transition hover:brightness-95"
             >
               Send a parcel
             </Link>
             <Link
               href="/consumer/returns/new"
-              className="flex min-h-[42px] items-center justify-center rounded-control border border-white/20 px-3 text-[13px] font-semibold text-white transition hover:bg-white/10"
+              className="flex min-h-[42px] items-center justify-center rounded-control border border-white/30 px-3 text-sm font-semibold text-white transition hover:bg-white/10"
             >
               Return a product
             </Link>
@@ -107,19 +110,19 @@ export default function AppShell({
         ) : null}
         <SidebarNav items={items} />
         <div className="mt-auto px-4 pt-3">
-          <div className="rounded-card border border-white/10 bg-white/[0.04] p-3">
-            <p className="truncate text-[13px] font-semibold">{me.user.full_name}</p>
-            <p className="truncate text-[11px] text-white/55">{me.user.email}</p>
-            <p className="mt-1 text-[10px] uppercase tracking-wide text-lime/70">{role}</p>
+          <div className="rounded-card border border-white/15 bg-white/[0.06] p-3">
+            <p className="truncate text-sm font-semibold">{me.user.full_name}</p>
+            <p className="truncate text-2xs text-white/70">{me.user.email}</p>
+            <p className="mt-1 text-2xs uppercase tracking-wide text-white/70">{role}</p>
           </div>
-          <p className="mt-3 px-1 text-[10px] leading-4 text-white/35">
+          <p className="mt-3 px-1 text-2xs leading-4 text-white/60">
             ReTurn coordinates feasible shared routes. It does not operate the vehicles.
           </p>
         </div>
       </aside>
 
       <div className="flex min-h-screen flex-col lg:pl-[252px]">
-        <header className="sticky top-0 z-30 flex h-[64px] items-center gap-3 border-b bg-surface/95 px-4 backdrop-blur sm:h-[72px] sm:px-6">
+        <header className="on-dark sticky top-0 z-30 flex h-[64px] items-center gap-3 border-b bg-canvas/90 px-4 backdrop-blur sm:h-[72px] sm:px-6">
           <div className="lg:hidden">
             <Brand href={home} compact />
           </div>
@@ -139,7 +142,7 @@ export default function AppShell({
           </div>
         </header>
 
-        <main className="flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-10">
+        <main id="main" tabIndex={-1} className="flex-1 px-4 pb-24 pt-6 sm:px-6 lg:px-8 lg:pb-10">
           <div className="mx-auto w-full max-w-[1180px]">{children}</div>
         </main>
         <MobileNav items={items} />

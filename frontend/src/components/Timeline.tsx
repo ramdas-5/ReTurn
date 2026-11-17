@@ -21,7 +21,7 @@ export default function Timeline({
   emptyMessage?: string;
 }) {
   if (!events?.length) {
-    return <p className="rounded-control bg-surface-muted px-4 py-5 text-sm text-muted">{emptyMessage}</p>;
+    return <p className="rounded-control bg-surface-tint px-4 py-5 text-sm text-muted">{emptyMessage}</p>;
   }
 
   return (
@@ -31,15 +31,15 @@ export default function Timeline({
         return (
           <li key={event.id} className="relative flex gap-4 pb-6 last:pb-0">
             {!isLast ? <span className="timeline-line" aria-hidden="true" /> : null}
-            <span className="relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-[#c3e9da] bg-accent-soft text-accent-strong">
+            <span className="relative z-10 mt-0.5 flex h-7 w-7 shrink-0 items-center justify-center rounded-full border border-accent-border bg-accent-soft text-accent-strong">
               <EventIcon status={event.to_status} />
             </span>
             <div className="min-w-0 pt-0.5">
               <p className="text-sm font-medium">{event.to_label}</p>
               {event.reason ? (
-                <p className="mt-0.5 text-[13px] leading-5 text-muted">{event.reason}</p>
+                <p className="mt-0.5 text-sm leading-5 text-muted">{event.reason}</p>
               ) : null}
-              <p className="mt-1 text-[11px] text-muted">
+              <p className="mt-1 text-2xs text-muted">
                 {formatDateTime(event.created_at)} · {event.actor?.full_name ?? "System"} · {event.source}
               </p>
             </div>

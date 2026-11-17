@@ -29,6 +29,17 @@ The platform is honest by design:
 | Media | Private local storage in development, S3 adapter available |
 | Tests | Pytest (PostgreSQL) + Vitest + Next typecheck/lint/production build |
 
+### Design system
+
+Visual and accessibility rules live in [`DESIGN.md`](DESIGN.md); the managed design skill is [`skill.md`](skill.md); the original product playbook is preserved at [`docs/PROJECT-PLAYBOOK.md`](docs/PROJECT-PLAYBOOK.md).
+
+- Poppins (primary), loaded through `next/font`; system monospace for tabular/mono data.
+- Tokens are CSS custom properties in `frontend/src/app/globals.css`, exposed as semantic Tailwind names in `frontend/tailwind.config.ts`. The captured values are applied verbatim: `#202020`/`#242723`/`#4a4144` text, `#7c1d25` accent, `#000000` base surface, `#ffffff` panel surface, 20px/20px base type and the 13–22.5px scale, the 5–20px spacing scale, and 300/500/800 ms motion.
+- Page background is `surface.base` (`#000000`); cards, panels, tables and inputs are `surface.muted` (`#ffffff`) and re-declare the light text tokens via `.surface-light`/`.panel` so every pair stays legible.
+- WCAG 2.2 AA: visible `:focus-visible` ring, ≥4.5:1 body text, 44px primary targets, `prefers-reduced-motion` honoured.
+- Component states (default, hover, focus-visible, active, disabled, loading, error) live in `globals.css`; accessibility acceptance criteria are in `DESIGN.md`.
+- Raw palette values are limited to `frontend/src/lib/design-tokens.ts` (Recharts and Leaflet cannot read CSS variables) and the landing-page SVG illustration.
+
 ---
 
 ## 2. Roles and workflows

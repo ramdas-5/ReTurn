@@ -54,7 +54,7 @@ export default function BusinessProfilePage() {
         <Card className="mb-5">
           <h2 className="section-title">{profile.business_name}</h2>
           <p className="mt-1 text-sm text-muted">{profile.category ?? "Category not set"} · {profile.area ?? "Area not set"}</p>
-          <p className="mt-2 text-[13px]">{profile.contact_email} · {profile.contact_phone}</p>
+          <p className="mt-2 text-sm">{profile.contact_email} · {profile.contact_phone}</p>
         </Card>
       ) : null}
       <form onSubmit={submit} className="card card-pad space-y-4">
