@@ -3,174 +3,288 @@
 @tailwind utilities;
 
 /* ===========================================================================
-   DESIGN.md tokens — applied verbatim.
+   DESIGN.md tokens — captured from At (https://traced.life/) and applied
+   verbatim.
 
-   Base surface  #000000, muted surface #ffffff, text #202020/#242723/#4a4144,
-   accent/inverse #7c1d25, Poppins at 20px/20px, motion 300/500/800ms.
+   Surfaces  surface.base #000000, surface.muted #ffffff,
+             surface.raised #615e50, surface.strong #f5f5f5
+   Text      #413f32 / #201f1a / #fafafa / #67665f
+   Type      Saans, 16px base, 400 weight, 24px line-height,
+             12 / 14 / 16 / 28 / 40 / 48 scale
+   Spacing   4.03–16.13px, Radius 8 / 16 / full, Motion 150 / 250ms
 
-   The palette defines both a black surface and a white surface, so the app uses
-   page = surface.base and panels = surface.muted. `.surface-light` re-declares
-   the text tokens for content that sits on white, which keeps every pair at
-   WCAG 2.2 AA (#202020 on #ffffff = 15.0:1, #ffffff on #000000 = 21:1).
+   The storefront theme the tokens were captured from also exposes the brand
+   sage (#c7d2ac) and its validation tone (#ebab66); they are recorded here as
+   the primary and warning accents because the captured palette alone has no
+   interactive hue. Every raw value in this file is one of those tokens or an
+   alpha mix of one of them.
+
+   Page chrome is surface.muted (#ffffff); secondary bands are
+   surface.strong (#f5f5f5); hero, sidebar and dark blocks are surface.base
+   (#000000). `.on-dark` re-declares the semantic tokens for content on the
+   black surface, which keeps every pair at WCAG 2.2 AA
+   (#201f1a on #ffffff = 16.7:1, #fafafa on #000000 = 19.9:1, #c7d2ac
+   with #201f1a = 9.8:1).
    =========================================================================== */
 :root {
-  /* Captured raw tokens */
-  --color-text-primary: #202020;
-  --color-text-secondary: #242723;
-  --color-text-tertiary: #4a4144;
-  --color-text-inverse: #7c1d25;
+  /* Captured palette (DESIGN.md §Style Foundations) */
+  --color-text-primary: #413f32;
+  --color-text-secondary: #201f1a;
+  --color-text-tertiary: #fafafa;
+  --color-text-inverse: #67665f;
   --color-surface-base: #000000;
   --color-surface-muted: #ffffff;
+  --color-surface-raised: #615e50;
+  --color-surface-strong: #f5f5f5;
 
-  /* DESIGN.md font stack, used verbatim */
-  --font-primary-stack: "Poppins", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
-    Oxygen, Ubuntu, Cantarell, "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
-  --font-display: var(--font-poppins), var(--font-primary-stack);
-  --font-body: var(--font-poppins), var(--font-primary-stack);
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  /* Brand accents from the same storefront theme */
+  --color-primary: #c7d2ac;
+  --color-primary-70: #d8e0c5;
+  --color-primary-50: #e3e9d5;
+  --color-validation: #ebab66;
+  --color-quinary: #e1dcd7;
+  --color-light-70: #f8f8f8;
+  --color-dark-primary-80: #6d6c64;
+  --color-background-4-50: #b0aea7;
 
-  --font-size-base: 20px;
+  /* Type — Saans is the licensed brand face; Inter is the shipped fallback. */
+  --font-primary-stack: "Saans", var(--font-sans, "Inter"), -apple-system, BlinkMacSystemFont,
+    "Segoe UI", Roboto, sans-serif;
+  --font-display: var(--font-primary-stack);
+  --font-body: var(--font-primary-stack);
+  --font-mono: "Saans Semi Mono", ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+
+  --font-size-xs: 12px;
+  --font-size-sm: 14px;
+  --font-size-md: 16px;
+  --font-size-lg: 28px;
+  --font-size-xl: 40px;
+  --font-size-2xl: 48px;
+  --font-size-base: var(--font-size-md);
   --font-weight-base: 400;
-  --line-height-base: 20px;
+  --line-height-base: 24px;
 
-  --space-1: 5px;
-  --space-2: 6px;
-  --space-3: 12px;
-  --space-4: 14px;
-  --space-5: 16px;
-  --space-6: 17px;
-  --space-7: 18px;
-  --space-8: 20px;
+  --space-1: 4.03px;
+  --space-2: 5.04px;
+  --space-3: 6.05px;
+  --space-4: 7.06px;
+  --space-5: 8.06px;
+  --space-6: 12.1px;
+  --space-7: 12.6px;
+  --space-8: 16.13px;
 
-  --duration-instant: 300ms;
-  --duration-fast: 500ms;
-  --duration-normal: 800ms;
+  --radius-xs: 8px;
+  --radius-sm: 16px;
+  --radius-md: 9999.01px;
+  --radius-control: var(--radius-xs);
+  --radius-card: var(--radius-sm);
+  --radius-pill: var(--radius-md);
 
-  /* Derived geometry (DESIGN.md gives no radius/shadow scale) */
-  --radius-control: 6px;
-  --radius-card: 12px;
-  --radius-modal: 16px;
-  --shadow-card: 0 2px 14px rgba(0, 0, 0, 0.28);
-  --shadow-floating: 0 14px 42px rgba(0, 0, 0, 0.45);
-  --ease-standard: cubic-bezier(0.2, 0, 0, 1);
+  --duration-instant: 150ms;
+  --duration-fast: 250ms;
 
-  /* Active context = surface.base (#000000) */
-  --surface-base: var(--color-surface-base);
+  --ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
+
+  /* Derived geometry (DESIGN.md gives no shadow scale) */
+  --shadow-card: 0 1px 2px rgba(32, 31, 26, 0.04), 0 10px 30px rgba(32, 31, 26, 0.06);
+  --shadow-floating: 0 18px 48px rgba(32, 31, 26, 0.18);
+
+  /* Semantic tokens — light context (page = surface.muted) */
+  --canvas: var(--color-surface-muted);
+  --surface-base: var(--color-surface-muted);
   --surface: var(--color-surface-muted);
-  --surface-tint: rgba(255, 255, 255, 0.08);
-  --surface-hover: var(--surface-tint);
-  --ink: var(--color-surface-muted);
-  --ink-2: var(--color-surface-muted);
-  --muted: rgba(255, 255, 255, 0.72);
-  --line: rgba(255, 255, 255, 0.18);
-  --line-strong: rgba(255, 255, 255, 0.32);
-  --accent: var(--color-surface-muted);
-  --accent-strong: var(--color-surface-muted);
-  --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-border: rgba(255, 255, 255, 0.3);
-  --accent-on-base: var(--color-surface-muted);
-  --focus-ring: var(--color-surface-muted);
-  --btn-secondary-bg: transparent;
-  --btn-primary-hover-bg: var(--color-surface-muted);
-  --btn-primary-hover-ink: var(--color-text-inverse);
-  --btn-danger-hover-bg: rgba(255, 255, 255, 0.9);
+  --surface-muted: var(--color-surface-strong);
+  --surface-tint: rgba(32, 31, 26, 0.045);
+  --surface-hover: rgba(32, 31, 26, 0.07);
 
-  /* Status tokens, derived only from the palette (no new hues).
-     On the black base, status text uses surface.muted: maroon and tertiary
-     do not reach 4.5:1 against #000000. Panels restore the light values. */
-  --amber: var(--color-text-tertiary);
-  --amber-soft: rgba(74, 65, 68, 0.28);
-  --amber-border: rgba(74, 65, 68, 0.55);
-  --amber-ink: var(--color-surface-muted);
-  --red: var(--color-text-inverse);
-  --red-soft: rgba(124, 29, 37, 0.3);
-  --red-border: rgba(124, 29, 37, 0.6);
-  --red-ink: var(--color-surface-muted);
-  --blue: var(--color-text-primary);
-  --blue-soft: rgba(255, 255, 255, 0.08);
-  --blue-border: rgba(255, 255, 255, 0.32);
-  --blue-ink: var(--color-surface-muted);
+  --ink: var(--color-text-secondary);
+  --ink-2: var(--color-text-primary);
+  --muted: var(--color-dark-primary-80);
+  --line: rgba(32, 31, 26, 0.12);
+  --line-strong: rgba(32, 31, 26, 0.26);
 
-  /* Outlined chip (the "secondary lane" marker) */
-  --chip-outline-bg: var(--color-surface-muted);
-  --chip-outline-ink: var(--color-surface-base);
-  --chip-outline-border: var(--color-surface-muted);
+  --accent: var(--color-primary);
+  --accent-ink: var(--color-text-secondary);
+  --accent-strong: var(--color-text-primary);
+  --accent-soft: var(--color-primary-50);
+  --accent-border: var(--color-primary);
+  --focus-ring: var(--color-text-primary);
+
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-ink: var(--color-text-secondary);
+  --btn-primary-hover-bg: var(--color-primary-70);
+  --btn-secondary-bg: var(--color-surface-muted);
+  --btn-secondary-hover-bg: var(--color-surface-strong);
+  --btn-danger-bg: var(--color-surface-muted);
+  --btn-danger-ink: var(--color-text-secondary);
+  --btn-danger-border: var(--color-text-secondary);
+  --btn-danger-hover-bg: var(--color-surface-strong);
+
+  /* Status tokens, derived only from the palette (no new hues). */
+  --amber: var(--color-validation);
+  --amber-soft: #f8e9d3;
+  --amber-border: var(--color-validation);
+  --amber-ink: var(--color-text-secondary);
+  --red: var(--color-text-secondary);
+  --red-soft: var(--color-surface-strong);
+  --red-border: rgba(32, 31, 26, 0.3);
+  --red-ink: var(--color-text-secondary);
+  --blue: var(--color-surface-raised);
+  --blue-soft: var(--color-quinary);
+  --blue-border: var(--color-background-4-50);
+  --blue-ink: var(--color-text-primary);
+
+  /* Chips — label + icon carry meaning, never colour alone. */
+  --chip-neutral-bg: var(--color-surface-strong);
+  --chip-neutral-ink: var(--color-text-primary);
+  --chip-neutral-border: var(--line);
+  --chip-green-bg: var(--color-primary);
+  --chip-green-ink: var(--color-text-secondary);
+  --chip-green-border: var(--color-primary);
+  --chip-teal-bg: var(--color-primary-50);
+  --chip-teal-ink: var(--color-text-secondary);
+  --chip-teal-border: var(--color-primary);
+  --chip-sand-bg: var(--color-quinary);
+  --chip-sand-ink: var(--color-text-primary);
+  --chip-sand-border: var(--color-background-4-50);
+  --chip-amber-bg: var(--color-validation);
+  --chip-amber-ink: var(--color-text-secondary);
+  --chip-amber-border: var(--color-validation);
+  --chip-ink-bg: var(--color-text-secondary);
+  --chip-ink-ink: var(--color-text-tertiary);
+  --chip-ink-border: var(--color-text-secondary);
+
+  color-scheme: light;
 }
 
-/* Panel context = surface.muted (#ffffff). */
-.surface-light,
-.card,
-.table-wrap,
-.panel,
-.input {
-  --ink: var(--color-text-primary);
-  --ink-2: var(--color-text-secondary);
-  --muted: var(--color-text-tertiary);
-  --line: rgba(32, 32, 32, 0.16);
-  --line-strong: rgba(32, 32, 32, 0.3);
-  --surface: var(--color-surface-muted);
-  --surface-tint: rgba(32, 32, 32, 0.06);
-  --surface-hover: rgba(32, 32, 32, 0.04);
-  --accent: var(--color-text-inverse);
-  --accent-strong: var(--color-text-inverse);
-  --accent-soft: rgba(124, 29, 37, 0.08);
-  --accent-border: rgba(124, 29, 37, 0.35);
-  --focus-ring: var(--color-text-inverse);
-  --btn-secondary-bg: var(--color-surface-muted);
-  --btn-primary-hover-bg: var(--color-text-secondary);
-  --btn-primary-hover-ink: var(--color-surface-muted);
-  --btn-danger-hover-bg: rgba(124, 29, 37, 0.08);
-  --amber: var(--color-text-tertiary);
-  --amber-soft: rgba(74, 65, 68, 0.12);
-  --amber-border: rgba(74, 65, 68, 0.32);
+/* Inverse context = surface.base (#000000). */
+.on-dark {
+  --canvas: var(--color-surface-base);
+  --surface-base: var(--color-surface-base);
+  --surface: var(--color-surface-base);
+  --surface-muted: var(--color-surface-raised);
+  --surface-tint: rgba(250, 250, 250, 0.08);
+  --surface-hover: rgba(250, 250, 250, 0.14);
+
+  --ink: var(--color-text-tertiary);
+  --ink-2: var(--color-surface-muted);
+  --muted: rgba(250, 250, 250, 0.72);
+  --line: rgba(250, 250, 250, 0.16);
+  --line-strong: rgba(250, 250, 250, 0.3);
+
+  --accent: var(--color-primary);
+  --accent-ink: var(--color-text-secondary);
+  --accent-strong: var(--color-primary);
+  --accent-soft: rgba(199, 210, 172, 0.14);
+  --accent-border: rgba(199, 210, 172, 0.42);
+  --focus-ring: var(--color-primary);
+
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-ink: var(--color-text-secondary);
+  --btn-primary-hover-bg: var(--color-primary-70);
+  --btn-secondary-bg: transparent;
+  --btn-secondary-hover-bg: rgba(250, 250, 250, 0.1);
+  --btn-danger-bg: transparent;
+  --btn-danger-ink: var(--color-text-tertiary);
+  --btn-danger-border: rgba(250, 250, 250, 0.4);
+  --btn-danger-hover-bg: rgba(250, 250, 250, 0.1);
+
+  --amber: var(--color-validation);
+  --amber-soft: rgba(235, 171, 102, 0.2);
+  --amber-border: rgba(235, 171, 102, 0.55);
   --amber-ink: var(--color-text-tertiary);
-  --red: var(--color-text-inverse);
-  --red-soft: rgba(124, 29, 37, 0.1);
-  --red-border: rgba(124, 29, 37, 0.35);
-  --red-ink: var(--color-text-inverse);
-  --blue: var(--color-text-primary);
-  --blue-soft: rgba(32, 32, 32, 0.07);
-  --blue-border: rgba(32, 32, 32, 0.22);
-  --blue-ink: var(--color-text-primary);
-  --chip-outline-bg: var(--color-surface-muted);
-  --chip-outline-ink: var(--color-text-primary);
-  --chip-outline-border: var(--color-text-primary);
+  --red: var(--color-text-tertiary);
+  --red-soft: rgba(250, 250, 250, 0.1);
+  --red-border: rgba(250, 250, 250, 0.3);
+  --red-ink: var(--color-text-tertiary);
+  --blue: var(--color-primary);
+  --blue-soft: rgba(199, 210, 172, 0.12);
+  --blue-border: rgba(199, 210, 172, 0.4);
+  --blue-ink: var(--color-primary);
+
+  --chip-neutral-bg: rgba(250, 250, 250, 0.1);
+  --chip-neutral-ink: var(--color-text-tertiary);
+  --chip-neutral-border: var(--line);
+  --chip-green-bg: var(--color-primary);
+  --chip-green-ink: var(--color-text-secondary);
+  --chip-green-border: var(--color-primary);
+  --chip-teal-bg: rgba(199, 210, 172, 0.18);
+  --chip-teal-ink: var(--color-primary-50);
+  --chip-teal-border: rgba(199, 210, 172, 0.42);
+  --chip-sand-bg: var(--color-surface-raised);
+  --chip-sand-ink: var(--color-text-tertiary);
+  --chip-sand-border: rgba(250, 250, 250, 0.3);
+  --chip-amber-bg: var(--color-validation);
+  --chip-amber-ink: var(--color-text-secondary);
+  --chip-amber-border: var(--color-validation);
+  --chip-ink-bg: var(--color-text-tertiary);
+  --chip-ink-ink: var(--color-text-secondary);
+  --chip-ink-border: var(--color-text-tertiary);
+
+  color-scheme: dark;
   color: var(--ink);
 }
 
-.on-dark {
-  --ink: var(--color-surface-muted);
-  --ink-2: var(--color-surface-muted);
-  --muted: rgba(255, 255, 255, 0.72);
+/* Light token context for content nested inside a dark block (map overlays,
+   panels dropped onto the black hero). Mirrors :root. */
+.surface-light {
+  --canvas: var(--color-surface-muted);
+  --surface-base: var(--color-surface-muted);
   --surface: var(--color-surface-muted);
-  --surface-tint: rgba(255, 255, 255, 0.08);
-  --surface-hover: var(--surface-tint);
-  --line: rgba(255, 255, 255, 0.18);
-  --line-strong: rgba(255, 255, 255, 0.32);
-  --accent: var(--color-surface-muted);
-  --accent-strong: var(--color-surface-muted);
-  --accent-soft: rgba(255, 255, 255, 0.12);
-  --accent-border: rgba(255, 255, 255, 0.3);
-  --focus-ring: var(--color-surface-muted);
-  --btn-secondary-bg: transparent;
-  --btn-primary-hover-bg: var(--color-surface-muted);
-  --btn-primary-hover-ink: var(--color-text-inverse);
-  --btn-danger-hover-bg: rgba(255, 255, 255, 0.9);
-  --amber: var(--color-text-tertiary);
-  --amber-soft: rgba(74, 65, 68, 0.28);
-  --amber-border: rgba(74, 65, 68, 0.55);
-  --amber-ink: var(--color-surface-muted);
-  --red: var(--color-text-inverse);
-  --red-soft: rgba(124, 29, 37, 0.3);
-  --red-border: rgba(124, 29, 37, 0.6);
-  --red-ink: var(--color-surface-muted);
-  --blue: var(--color-text-primary);
-  --blue-soft: rgba(255, 255, 255, 0.08);
-  --blue-border: rgba(255, 255, 255, 0.32);
-  --blue-ink: var(--color-surface-muted);
-  --chip-outline-bg: var(--color-surface-muted);
-  --chip-outline-ink: var(--color-surface-base);
-  --chip-outline-border: var(--color-surface-muted);
+  --surface-muted: var(--color-surface-strong);
+  --surface-tint: rgba(32, 31, 26, 0.045);
+  --surface-hover: rgba(32, 31, 26, 0.07);
+  --ink: var(--color-text-secondary);
+  --ink-2: var(--color-text-primary);
+  --muted: var(--color-dark-primary-80);
+  --line: rgba(32, 31, 26, 0.12);
+  --line-strong: rgba(32, 31, 26, 0.26);
+  --accent: var(--color-primary);
+  --accent-ink: var(--color-text-secondary);
+  --accent-strong: var(--color-text-primary);
+  --accent-soft: var(--color-primary-50);
+  --accent-border: var(--color-primary);
+  --focus-ring: var(--color-text-primary);
+  --btn-primary-bg: var(--color-primary);
+  --btn-primary-ink: var(--color-text-secondary);
+  --btn-primary-hover-bg: var(--color-primary-70);
+  --btn-secondary-bg: var(--color-surface-muted);
+  --btn-secondary-hover-bg: var(--color-surface-strong);
+  --btn-danger-bg: var(--color-surface-muted);
+  --btn-danger-ink: var(--color-text-secondary);
+  --btn-danger-border: var(--color-text-secondary);
+  --btn-danger-hover-bg: var(--color-surface-strong);
+  --amber: var(--color-validation);
+  --amber-soft: #f8e9d3;
+  --amber-border: var(--color-validation);
+  --amber-ink: var(--color-text-secondary);
+  --red: var(--color-text-secondary);
+  --red-soft: var(--color-surface-strong);
+  --red-border: rgba(32, 31, 26, 0.3);
+  --red-ink: var(--color-text-secondary);
+  --blue: var(--color-surface-raised);
+  --blue-soft: var(--color-quinary);
+  --blue-border: var(--color-background-4-50);
+  --blue-ink: var(--color-text-primary);
+  --chip-neutral-bg: var(--color-surface-strong);
+  --chip-neutral-ink: var(--color-text-primary);
+  --chip-neutral-border: var(--line);
+  --chip-green-bg: var(--color-primary);
+  --chip-green-ink: var(--color-text-secondary);
+  --chip-green-border: var(--color-primary);
+  --chip-teal-bg: var(--color-primary-50);
+  --chip-teal-ink: var(--color-text-secondary);
+  --chip-teal-border: var(--color-primary);
+  --chip-sand-bg: var(--color-quinary);
+  --chip-sand-ink: var(--color-text-primary);
+  --chip-sand-border: var(--color-background-4-50);
+  --chip-amber-bg: var(--color-validation);
+  --chip-amber-ink: var(--color-text-secondary);
+  --chip-amber-border: var(--color-validation);
+  --chip-ink-bg: var(--color-text-secondary);
+  --chip-ink-ink: var(--color-text-tertiary);
+  --chip-ink-border: var(--color-text-secondary);
+  color-scheme: light;
   color: var(--ink);
 }
 
@@ -180,16 +294,18 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--canvas);
 }
 
 body {
-  background: var(--surface-base);
+  background: var(--canvas);
   color: var(--ink);
   font-family: var(--font-body), sans-serif;
   font-size: var(--font-size-base);
   font-weight: var(--font-weight-base);
   line-height: var(--line-height-base);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
   text-rendering: optimizeLegibility;
 }
 
@@ -199,12 +315,13 @@ h3,
 h4,
 .font-display {
   font-family: var(--font-display), sans-serif;
-  letter-spacing: -0.02em;
+  font-weight: 500;
+  letter-spacing: -0.015em;
 }
 
 ::selection {
-  background: var(--color-text-inverse);
-  color: var(--color-surface-muted);
+  background: var(--color-primary);
+  color: var(--color-text-secondary);
 }
 
 :focus-visible {
@@ -223,12 +340,13 @@ h4,
   z-index: 100;
   transform: translateY(-200%);
   border-radius: var(--radius-control);
-  background: var(--color-surface-muted);
-  color: var(--color-text-primary);
-  padding: var(--space-3) var(--space-5);
-  font-size: 13.33px;
+  background: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
+  padding: var(--space-6) var(--space-8);
+  font-size: var(--font-size-sm);
   font-weight: 600;
   box-shadow: var(--shadow-floating);
+  transition: transform var(--duration-fast) var(--ease-standard);
 }
 
 .skip-link:focus,
@@ -252,30 +370,41 @@ h4,
     @apply mx-auto w-full max-w-container px-5 sm:px-8 lg:px-10;
   }
 
-  .surface-light,
-  .panel {
-    background: var(--color-surface-muted);
+  /* Soft sage ambience for the black hero/auth panels (surface token alpha). */
+  .glow-sage {
+    background: radial-gradient(circle, rgba(199, 210, 172, 0.28), rgba(199, 210, 172, 0) 68%);
+  }
+
+  .panel,
+  .card,
+  .table-wrap {
+    background: var(--surface);
   }
 
   .card {
-    background: var(--color-surface-muted);
-    border: 1px solid rgba(32, 32, 32, 0.16);
+    border: 1px solid var(--line);
     border-radius: var(--radius-card);
     box-shadow: var(--shadow-card);
   }
 
+  .panel {
+    border: 1px solid var(--line);
+    border-radius: var(--radius-card);
+  }
+
   .card-pad {
-    padding: var(--space-8);
+    padding: calc(var(--space-8) * 1.5);
   }
 
   /* Button — default / hover / focus-visible / active / disabled / loading / error */
   .btn {
     @apply inline-flex items-center justify-center font-medium;
     min-height: 44px;
-    gap: var(--space-2);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-3);
+    padding: var(--space-6) var(--space-8);
+    border: 1px solid transparent;
     border-radius: var(--radius-control);
-    font-size: 13.33px;
+    font-size: var(--font-size-sm);
     line-height: 20px;
     transition-property: background-color, border-color, color, filter, transform;
     transition-duration: var(--duration-fast);
@@ -298,24 +427,26 @@ h4,
   }
 
   .btn-primary {
-    background: var(--color-text-inverse);
-    color: var(--color-surface-muted);
+    background: var(--btn-primary-bg);
+    color: var(--btn-primary-ink);
+    border-color: var(--btn-primary-bg);
   }
 
   .btn-primary:hover:not(:disabled),
   .btn-primary:active:not(:disabled) {
     background: var(--btn-primary-hover-bg);
-    color: var(--btn-primary-hover-ink);
+    border-color: var(--btn-primary-hover-bg);
+    color: var(--btn-primary-ink);
   }
 
   .btn-secondary {
     background: var(--btn-secondary-bg);
     color: var(--ink);
-    border: 1px solid var(--line-strong);
+    border-color: var(--line-strong);
   }
 
   .btn-secondary:hover:not(:disabled) {
-    background: var(--surface-tint);
+    background: var(--btn-secondary-hover-bg);
   }
 
   .btn-ghost {
@@ -328,49 +459,40 @@ h4,
     color: var(--ink);
   }
 
-  /* Danger is an outlined inverse-accent action, distinguishable from primary. */
+  /* Destructive actions use the ink outline, never a second hue. */
   .btn-danger {
-    background: var(--color-surface-muted);
-    color: var(--color-text-inverse);
-    border: 1px solid var(--color-text-inverse);
+    background: var(--btn-danger-bg);
+    color: var(--btn-danger-ink);
+    border-color: var(--btn-danger-border);
   }
 
   .btn-danger:hover:not(:disabled) {
     background: var(--btn-danger-hover-bg);
   }
 
-  .btn-lime {
-    background: var(--color-surface-muted);
-    color: var(--color-text-primary);
-  }
-
-  .btn-lime:hover:not(:disabled) {
-    background: rgba(255, 255, 255, 0.85);
-  }
-
   .btn-sm {
     min-height: 36px;
-    padding: var(--space-2) var(--space-3);
-    font-size: 13px;
-    line-height: 20px;
+    padding: var(--space-5) var(--space-6);
+    font-size: var(--font-size-xs);
+    line-height: 18px;
   }
 
   /* Inputs sit on surface.muted, so they always use the light text tokens. */
   .input {
     @apply w-full;
     background: var(--color-surface-muted);
-    color: var(--color-text-primary);
-    border: 1px solid var(--color-text-tertiary);
+    color: var(--color-text-secondary);
+    border: 1px solid var(--line-strong);
     border-radius: var(--radius-control);
-    padding: var(--space-3) var(--space-4);
-    font-size: 13.33px;
+    padding: var(--space-6) var(--space-8);
+    font-size: var(--font-size-sm);
     line-height: 20px;
     transition: border-color var(--duration-fast) var(--ease-standard),
       box-shadow var(--duration-fast) var(--ease-standard);
   }
 
   .input::placeholder {
-    color: var(--color-text-tertiary);
+    color: var(--color-dark-primary-80);
     opacity: 1;
   }
 
@@ -379,124 +501,124 @@ h4,
   }
 
   .input:focus {
-    border-color: var(--color-text-inverse);
-    box-shadow: 0 0 0 3px rgba(124, 29, 37, 0.16);
+    border-color: var(--color-text-primary);
+    box-shadow: 0 0 0 3px rgba(199, 210, 172, 0.45);
   }
 
   .input:disabled {
-    background: rgba(32, 32, 32, 0.05);
-    color: var(--color-text-tertiary);
+    background: var(--color-surface-strong);
+    color: var(--color-dark-primary-80);
     cursor: not-allowed;
   }
 
   .input-error,
   .input[aria-invalid="true"] {
-    border-color: var(--color-text-inverse);
+    border-color: var(--color-validation);
   }
 
   .input-error:focus,
   .input[aria-invalid="true"]:focus {
-    box-shadow: 0 0 0 3px rgba(124, 29, 37, 0.16);
+    box-shadow: 0 0 0 3px rgba(235, 171, 102, 0.24);
   }
 
   .label {
     display: block;
     margin-bottom: var(--space-1);
-    font-size: 13px;
-    font-weight: 500;
-    line-height: 20px;
+    font-size: var(--font-size-xs);
+    font-weight: 600;
+    line-height: 16px;
     color: var(--ink-2);
   }
 
   .help {
     margin-top: var(--space-1);
-    font-size: 13px;
-    line-height: 20px;
+    font-size: var(--font-size-xs);
+    line-height: 18px;
     color: var(--muted);
   }
 
   .error-text {
     margin-top: var(--space-1);
-    font-size: 13px;
-    line-height: 20px;
+    font-size: var(--font-size-xs);
+    line-height: 18px;
+    font-weight: 500;
     color: var(--red-ink);
   }
 
-  /* Chips — palette-only tones; label + icon carry meaning, never colour alone. */
+  /* Chips — pill radius from the token scale. */
   .chip {
     @apply inline-flex items-center;
     min-height: 24px;
     gap: var(--space-1);
-    padding: var(--space-1) var(--space-3);
-    border-radius: 999px;
+    padding: var(--space-1) var(--space-6);
+    border-radius: var(--radius-pill);
     border-width: 1px;
-    font-size: 13px;
+    border-style: solid;
+    font-size: var(--font-size-xs);
     font-weight: 500;
     line-height: 16px;
+    white-space: nowrap;
   }
 
   .chip-neutral {
-    background: var(--surface-tint);
-    color: var(--muted);
-    border-color: var(--line-strong);
+    background: var(--chip-neutral-bg);
+    color: var(--chip-neutral-ink);
+    border-color: var(--chip-neutral-border);
   }
 
-  /* Filled chips stay #202020 on surface.muted in panels; on the black base the
-     hairline border and the white label preserve the chip boundary. */
   .chip-blue {
-    background: var(--color-text-primary);
-    color: var(--color-surface-muted);
-    border-color: var(--line-strong);
+    background: var(--chip-sand-bg);
+    color: var(--chip-sand-ink);
+    border-color: var(--chip-sand-border);
   }
 
   .chip-teal {
-    background: var(--chip-outline-bg);
-    color: var(--chip-outline-ink);
-    border-color: var(--chip-outline-border);
-  }
-
-  .chip-amber {
-    background: var(--color-text-tertiary);
-    color: var(--color-surface-muted);
-    border-color: var(--line-strong);
+    background: var(--chip-teal-bg);
+    color: var(--chip-teal-ink);
+    border-color: var(--chip-teal-border);
   }
 
   .chip-green {
-    background: var(--color-text-primary);
-    color: var(--color-surface-muted);
-    border-color: var(--line-strong);
+    background: var(--chip-green-bg);
+    color: var(--chip-green-ink);
+    border-color: var(--chip-green-border);
+  }
+
+  .chip-amber {
+    background: var(--chip-amber-bg);
+    color: var(--chip-amber-ink);
+    border-color: var(--chip-amber-border);
   }
 
   .chip-red {
-    background: var(--color-text-inverse);
-    color: var(--color-surface-muted);
-    border-color: var(--color-text-inverse);
+    background: var(--chip-ink-bg);
+    color: var(--chip-ink-ink);
+    border-color: var(--chip-ink-border);
   }
 
   .eyebrow {
-    font-size: 13px;
+    font-size: var(--font-size-xs);
     font-weight: 600;
     text-transform: uppercase;
-    letter-spacing: 0.18em;
+    letter-spacing: 0.16em;
     color: var(--muted);
   }
 
   .link {
-    color: var(--accent);
+    color: var(--accent-strong);
     text-decoration: underline;
     text-decoration-thickness: 1px;
-    text-decoration-color: var(--accent-border);
+    text-decoration-color: var(--line-strong);
     text-underline-offset: 3px;
     transition: text-decoration-color var(--duration-fast) var(--ease-standard);
   }
 
   .link:hover {
-    text-decoration-color: var(--accent);
+    text-decoration-color: var(--accent-strong);
   }
 
   .table-wrap {
-    background: var(--color-surface-muted);
-    border: 1px solid rgba(32, 32, 32, 0.16);
+    border: 1px solid var(--line);
     border-radius: var(--radius-card);
     overflow: hidden;
   }
@@ -507,22 +629,22 @@ h4,
 
   .data-table {
     @apply w-full min-w-[640px] text-left;
-    font-size: 13.33px;
+    font-size: var(--font-size-sm);
     line-height: 20px;
     color: var(--color-text-primary);
   }
 
   .data-table th {
     @apply whitespace-nowrap align-top font-semibold uppercase tracking-wider;
-    padding: var(--space-3) var(--space-4);
-    font-size: 13px;
-    background: rgba(32, 32, 32, 0.05);
-    color: var(--color-text-tertiary);
+    padding: var(--space-6) var(--space-8);
+    font-size: var(--font-size-xs);
+    background: var(--color-light-70);
+    color: var(--color-dark-primary-80);
   }
 
   .data-table td {
-    padding: var(--space-4);
-    border-top: 1px solid rgba(32, 32, 32, 0.12);
+    padding: var(--space-8);
+    border-top: 1px solid var(--line);
     vertical-align: top;
   }
 
@@ -531,13 +653,16 @@ h4,
   }
 
   .data-table tbody tr:hover {
-    background: rgba(32, 32, 32, 0.04);
+    background: var(--surface-tint);
   }
 
   .stat-value {
     font-family: var(--font-display), sans-serif;
     font-variant-numeric: tabular-nums;
-    @apply text-4xl font-bold leading-none tracking-tight;
+    font-size: var(--font-size-lg);
+    line-height: 1.05;
+    font-weight: 500;
+    letter-spacing: -0.02em;
   }
 
   .mono {
@@ -550,9 +675,9 @@ h4,
   }
 
   .section-title {
-    font-size: 18px;
-    font-weight: 700;
-    line-height: 26px;
+    font-size: var(--font-size-md);
+    font-weight: 600;
+    line-height: 24px;
   }
 
   .divider {
@@ -563,31 +688,32 @@ h4,
   }
 
   .skeleton {
-    @apply animate-pulse rounded-lg;
-    background: var(--surface-tint);
+    @apply animate-pulse;
+    border-radius: var(--radius-control);
+    background: var(--color-surface-strong);
   }
 
   .nav-item {
     @apply flex items-center font-medium;
-    gap: var(--space-3);
-    padding: var(--space-3) var(--space-4);
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-8);
     border-radius: var(--radius-control);
-    font-size: 13.33px;
+    font-size: var(--font-size-sm);
     line-height: 20px;
-    color: rgba(255, 255, 255, 0.72);
+    color: var(--muted);
     transition: background-color var(--duration-fast) var(--ease-standard),
       color var(--duration-fast) var(--ease-standard);
   }
 
   .nav-item:hover {
-    background: rgba(255, 255, 255, 0.08);
-    color: var(--color-surface-muted);
+    background: var(--surface-tint);
+    color: var(--ink);
   }
 
   .nav-item[aria-current="page"],
   .nav-item-active {
-    background: var(--color-text-inverse);
-    color: var(--color-surface-muted);
+    background: var(--accent);
+    color: var(--accent-ink);
   }
 
   .timeline-line {
@@ -598,13 +724,13 @@ h4,
   .route-thread-path {
     stroke-dasharray: 600;
     stroke-dashoffset: 0;
-    animation: draw-route var(--duration-normal) var(--ease-standard) both;
+    animation: draw-route var(--duration-fast) var(--ease-standard) both;
   }
 }
 
 /* Leaflet (client map only) */
 .leaflet-container {
-  background: rgba(32, 32, 32, 0.06);
+  background: var(--color-light-70);
   font-family: var(--font-body), sans-serif;
 }
 
@@ -619,32 +745,35 @@ h4,
   justify-content: center;
   width: 30px;
   height: 30px;
-  font-size: 13px;
+  font-size: var(--font-size-xs);
   font-weight: 700;
-  color: var(--color-surface-muted);
-  background: var(--color-text-inverse);
+  color: var(--color-text-secondary);
+  background: var(--color-primary);
   border: 2px solid var(--color-surface-muted);
   box-shadow: var(--shadow-floating);
-  border-radius: 50%;
+  border-radius: var(--radius-pill);
 }
 
 .rt-stop-marker.dropoff {
   background: var(--color-text-primary);
+  color: var(--color-text-tertiary);
   border-radius: var(--radius-control);
 }
 
 .rt-stop-marker.is-active {
-  background: var(--color-surface-muted);
-  color: var(--color-text-primary);
+  background: var(--color-text-secondary);
+  color: var(--color-text-tertiary);
   width: 36px;
   height: 36px;
 }
 
 .rt-stop-marker.is-done {
-  background: var(--color-text-tertiary);
+  background: var(--color-surface-raised);
+  color: var(--color-text-tertiary);
 }
 
 .leaflet-control-attribution {
-  font-size: 13px !important;
+  font-size: var(--font-size-xs) !important;
   background: rgba(255, 255, 255, 0.9) !important;
+  color: var(--color-text-primary) !important;
 }

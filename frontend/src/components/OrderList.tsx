@@ -38,7 +38,7 @@ export default function OrderList({
             {orders.map((order) => (
               <tr key={order.id}>
                 <td>
-                  <Link href={`${hrefBase}/${order.id}`} className="font-semibold text-accent hover:underline">
+                  <Link href={`${hrefBase}/${order.id}`} className="font-semibold text-accent-strong hover:underline">
                     {order.order_number}
                   </Link>
                   <div className="mt-1 flex flex-wrap items-center gap-1.5">

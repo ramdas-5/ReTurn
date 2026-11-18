@@ -36,7 +36,7 @@ export function CountBarChart({ data }: { data: ChartDatum[] }) {
             tick={{ fontSize: 11, fill: chartAxis.tickStrong }}
           />
           <Tooltip cursor={{ fill: chartAxis.cursor }} />
-          <Bar dataKey="value" fill={palette.accent} radius={[0, 4, 4, 0]} name="Count" />
+          <Bar dataKey="value" fill={palette.ink} radius={[0, 4, 4, 0]} name="Count" />
         </BarChart>
       </ResponsiveContainer>
     </div>

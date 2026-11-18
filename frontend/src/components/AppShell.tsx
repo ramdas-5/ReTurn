@@ -85,10 +85,10 @@ export default function AppShell({
       <a href="#main" className="skip-link">
         Skip to content
       </a>
-      <aside className="on-dark fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-canvas pb-5 pt-6 text-white lg:flex">
+      <aside className="on-dark fixed inset-y-0 left-0 z-40 hidden w-[252px] flex-col bg-inverse pb-5 pt-6 text-white lg:flex">
         <div className="px-4">
           <Brand href={home} invert />
-          <p className="mt-2 text-2xs uppercase tracking-[0.16em] text-white/70">
+          <p className="mt-2 text-2xs uppercase tracking-[0.16em] text-muted">
             {ROLE_LABEL[role]}
           </p>
         </div>
@@ -96,13 +96,13 @@ export default function AppShell({
           <div className="mt-4 space-y-2 px-3">
             <Link
               href="/consumer/parcels/new"
-              className="flex min-h-[42px] items-center justify-center rounded-control bg-lime px-3 text-sm font-semibold text-canvas transition hover:brightness-95"
+              className="flex min-h-[42px] items-center justify-center rounded-control bg-primary px-3 text-sm font-semibold text-ink-deep transition hover:bg-primary-70"
             >
               Send a parcel
             </Link>
             <Link
               href="/consumer/returns/new"
-              className="flex min-h-[42px] items-center justify-center rounded-control border border-white/30 px-3 text-sm font-semibold text-white transition hover:bg-white/10"
+              className="flex min-h-[42px] items-center justify-center rounded-control border border-white/25 px-3 text-sm font-semibold text-white transition hover:bg-white/10"
             >
               Return a product
             </Link>
@@ -112,17 +112,17 @@ export default function AppShell({
         <div className="mt-auto px-4 pt-3">
           <div className="rounded-card border border-white/15 bg-white/[0.06] p-3">
             <p className="truncate text-sm font-semibold">{me.user.full_name}</p>
-            <p className="truncate text-2xs text-white/70">{me.user.email}</p>
-            <p className="mt-1 text-2xs uppercase tracking-wide text-white/70">{role}</p>
+            <p className="truncate text-2xs text-muted">{me.user.email}</p>
+            <p className="mt-1 text-2xs uppercase tracking-wide text-muted">{role}</p>
           </div>
-          <p className="mt-3 px-1 text-2xs leading-4 text-white/60">
+          <p className="mt-3 px-1 text-2xs leading-4 text-muted">
             ReTurn coordinates feasible shared routes. It does not operate the vehicles.
           </p>
         </div>
       </aside>
 
       <div className="flex min-h-screen flex-col lg:pl-[252px]">
-        <header className="on-dark sticky top-0 z-30 flex h-[64px] items-center gap-3 border-b bg-canvas/90 px-4 backdrop-blur sm:h-[72px] sm:px-6">
+        <header className="sticky top-0 z-30 flex h-[64px] items-center gap-3 border-b bg-canvas px-4 sm:h-[72px] sm:px-6">
           <div className="lg:hidden">
             <Brand href={home} compact />
           </div>

@@ -57,7 +57,7 @@ export function NotificationMenu() {
             <p className="text-sm font-semibold">Notifications</p>
             <button
               type="button"
-              className="inline-flex items-center gap-1 text-xs text-accent hover:underline disabled:opacity-50"
+              className="inline-flex items-center gap-1 text-xs text-accent-strong hover:underline disabled:opacity-50"
               onClick={() => markAll.mutate()}
               disabled={markAll.isPending || unread === 0}
             >

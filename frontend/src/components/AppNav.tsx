@@ -80,7 +80,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
   return (
     <nav
       aria-label="Primary mobile"
-      className="on-dark fixed inset-x-0 bottom-0 z-40 border-t bg-canvas px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
+      className="on-dark fixed inset-x-0 bottom-0 z-40 border-t bg-inverse px-1 pb-[env(safe-area-inset-bottom)] lg:hidden"
     >
       <div className="flex items-stretch justify-around">
         {items.slice(0, 5).map((item) => {
@@ -93,7 +93,7 @@ export function MobileNav({ items }: { items: NavItem[] }) {
               aria-current={active ? "page" : undefined}
               className={cn(
                 "flex min-h-[56px] flex-1 flex-col items-center justify-center gap-1 border-t-2 px-1 py-2 text-2xs font-medium",
-                active ? "border-danger text-white" : "border-transparent text-white/60",
+                active ? "border-primary text-white" : "border-transparent text-muted",
               )}
             >
               <Icon size={19} strokeWidth={2} aria-hidden />

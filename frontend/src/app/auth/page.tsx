@@ -22,12 +22,12 @@ export default async function AuthPage({
 
   return (
     <main className="grid min-h-screen lg:grid-cols-[1.05fr_1fr]">
-      <section className="on-dark relative hidden flex-col justify-between overflow-hidden bg-canvas p-10 text-white lg:flex">
-        <div className="pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full bg-danger/30 blur-[110px]" aria-hidden="true" />
+      <section className="on-dark relative hidden flex-col justify-between overflow-hidden bg-inverse p-10 text-white lg:flex">
+        <div className="glow-sage pointer-events-none absolute -left-24 bottom-0 h-[420px] w-[420px] rounded-full" aria-hidden="true" />
         <Brand invert />
         <div className="relative">
-          <p className="text-2xs font-semibold uppercase tracking-[0.2em] text-lime">Shared logistics, honestly done</p>
-          <h1 className="mt-4 max-w-md text-6xl font-bold leading-[1.03] tracking-tight">
+          <p className="text-2xs font-semibold uppercase tracking-[0.2em] text-primary">Shared logistics, honestly done</p>
+          <h1 className="mt-4 max-w-md text-xl leading-[1.05] tracking-tight sm:text-2xl">
             One route. Multiple deliveries. Less waste.
           </h1>
           <p className="mt-4 max-w-md text-sm leading-6 text-white/65">
@@ -36,10 +36,10 @@ export default async function AuthPage({
           </p>
           <div className="mt-8 max-w-md rounded-card border border-white/12 bg-white/[0.04] p-5">
             <ul className="space-y-3 text-sm leading-5 text-white/70">
-              <li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Return destinations stay authorised.</li>
-              <li className="flex gap-2"><ShieldCheck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Drivers and vehicles are manager-verified.</li>
-              <li className="flex gap-2"><Truck size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Deliveries complete only with captured proof.</li>
-              <li className="flex gap-2"><Route size={15} className="mt-0.5 shrink-0 text-lime" aria-hidden /> Shared routes require genuine feasibility.</li>
+              <li className="flex gap-2"><CheckCircle2 size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden /> Return destinations stay authorised.</li>
+              <li className="flex gap-2"><ShieldCheck size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden /> Drivers and vehicles are manager-verified.</li>
+              <li className="flex gap-2"><Truck size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden /> Deliveries complete only with captured proof.</li>
+              <li className="flex gap-2"><Route size={15} className="mt-0.5 shrink-0 text-primary" aria-hidden /> Shared routes require genuine feasibility.</li>
             </ul>
           </div>
         </div>
@@ -57,7 +57,7 @@ export default async function AuthPage({
         </div>
         <div className="mx-auto flex w-full max-w-[430px] flex-1 flex-col justify-center py-10">
           <p className="eyebrow">ReTurn account</p>
-          <h2 className="mt-2 text-3xl font-bold leading-tight">Welcome to a calmer route</h2>
+          <h2 className="mt-2 text-lg leading-tight">Welcome to a calmer route</h2>
           <p className="mt-2 text-sm leading-6 text-muted">
             Sign in, or create a consumer account to send parcels and returns.
           </p>

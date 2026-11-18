@@ -1,16 +1,21 @@
 import type { Metadata, Viewport } from "next";
-import { Poppins } from "next/font/google";
+import { Inter } from "next/font/google";
 
 import Providers from "./providers";
 import { palette } from "@/lib/design-tokens";
 import "./globals.css";
 
-/** DESIGN.md §Style Foundations — Poppins is the primary family. */
-const primary = Poppins({
+/**
+ * DESIGN.md §Style Foundations — Saans is the primary family. It is a licensed
+ * face and is not redistributed with this repository, so the CSS stack puts
+ * "Saans" first and ships Inter (same grotesque proportions, 16/24 metrics) as
+ * the metric-compatible fallback.
+ */
+const sans = Inter({
   subsets: ["latin"],
-  variable: "--font-poppins",
+  variable: "--font-sans",
   display: "swap",
-  weight: ["400", "500", "600", "700"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 export const metadata: Metadata = {
@@ -27,13 +32,13 @@ export const metadata: Metadata = {
 export const viewport: Viewport = {
   width: "device-width",
   initialScale: 1,
-  themeColor: palette.base,
+  themeColor: palette.accent,
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" className={primary.variable}>
-      <body className="on-dark">
+    <html lang="en" className={sans.variable}>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>

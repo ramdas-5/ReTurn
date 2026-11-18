@@ -2,7 +2,9 @@ import type { Config } from "tailwindcss";
 
 /**
  * Tokens from DESIGN.md (the design-system contract for this repository).
- * Semantic aliases in `globals.css` resolve to the exact captured values.
+ * Semantic aliases in `globals.css` resolve to the exact captured values:
+ * At (traced.life), Saans at 16/24, the 12–48 type scale, the 4.03–16.13
+ * spacing scale, 8/16/full radii and 150/250ms motion.
  */
 const config: Config = {
   content: ["./src/**/*.{ts,tsx}"],
@@ -12,27 +14,37 @@ const config: Config = {
         ink: {
           DEFAULT: "var(--ink)",
           2: "var(--ink-2)",
-          deep: "var(--surface-base)",
+          deep: "var(--color-text-secondary)",
         },
-        canvas: "var(--surface-base)",
+        canvas: "var(--canvas)",
         surface: {
           DEFAULT: "var(--surface)",
-          muted: "var(--color-surface-muted)",
+          muted: "var(--surface-muted)",
+          label: "var(--color-surface-muted)",
+          raised: "var(--color-surface-raised)",
+          strong: "var(--color-surface-strong)",
           tint: "var(--surface-tint)",
           hover: "var(--surface-hover)",
         },
+        inverse: "var(--color-surface-base)",
         line: {
           DEFAULT: "var(--line)",
           strong: "var(--line-strong)",
         },
         muted: "var(--muted)",
+        primary: {
+          DEFAULT: "var(--color-primary)",
+          70: "var(--color-primary-70)",
+          50: "var(--color-primary-50)",
+        },
         accent: {
           DEFAULT: "var(--accent)",
+          ink: "var(--accent-ink)",
           strong: "var(--accent-strong)",
           soft: "var(--accent-soft)",
           border: "var(--accent-border)",
         },
-        lime: "var(--accent-on-base)",
+        lime: "var(--color-primary)",
         amber: {
           DEFAULT: "var(--amber)",
           soft: "var(--amber-soft)",
@@ -65,41 +77,35 @@ const config: Config = {
         },
       },
       fontFamily: {
-        display: ["var(--font-display)"],
-        sans: ["var(--font-body)"],
-        mono: ["var(--font-mono)"],
+        display: ["var(--font-display)", "sans-serif"],
+        sans: ["var(--font-body)", "sans-serif"],
+        mono: ["var(--font-mono)", "monospace"],
       },
       // DESIGN.md typography scale, used verbatim.
       fontSize: {
-        "2xs": ["13px", { lineHeight: "20px" }],
-        xs: ["13px", { lineHeight: "20px" }],
-        sm: ["13.33px", { lineHeight: "20px" }],
-        md: ["14px", { lineHeight: "20px" }],
-        base: ["20px", { lineHeight: "20px" }],
-        lg: ["15px", { lineHeight: "22px" }],
-        xl: ["17px", { lineHeight: "24px" }],
-        "2xl": ["18px", { lineHeight: "26px" }],
-        "3xl": ["20px", { lineHeight: "28px" }],
-        "4xl": ["22.5px", { lineHeight: "30px" }],
-        // Display sizes beyond the captured scale, for the landing hero only.
-        "5xl": ["28px", { lineHeight: "34px" }],
-        "6xl": ["34px", { lineHeight: "40px" }],
+        xs: ["12px", { lineHeight: "16px" }],
+        sm: ["14px", { lineHeight: "20px" }],
+        base: ["16px", { lineHeight: "24px" }],
+        md: ["16px", { lineHeight: "24px" }],
+        lg: ["28px", { lineHeight: "34px" }],
+        xl: ["40px", { lineHeight: "46px" }],
+        "2xl": ["48px", { lineHeight: "54px" }],
       },
       // DESIGN.md spacing scale. Use `p-s3`, `gap-s2`, … or the CSS variables.
       spacing: {
-        s1: "5px",
-        s2: "6px",
-        s3: "12px",
-        s4: "14px",
-        s5: "16px",
-        s6: "17px",
-        s7: "18px",
-        s8: "20px",
+        s1: "4.03px",
+        s2: "5.04px",
+        s3: "6.05px",
+        s4: "7.06px",
+        s5: "8.06px",
+        s6: "12.1px",
+        s7: "12.6px",
+        s8: "16.13px",
       },
       borderRadius: {
         control: "var(--radius-control)",
         card: "var(--radius-card)",
-        modal: "var(--radius-modal)",
+        pill: "var(--radius-pill)",
       },
       boxShadow: {
         card: "var(--shadow-card)",
@@ -107,12 +113,11 @@ const config: Config = {
       },
       // DESIGN.md motion tokens, used verbatim.
       transitionDuration: {
-        instant: "300ms",
-        fast: "500ms",
-        normal: "800ms",
+        instant: "150ms",
+        fast: "250ms",
       },
       transitionTimingFunction: {
-        standard: "cubic-bezier(0.2, 0, 0, 1)",
+        standard: "cubic-bezier(0.4, 0, 0.2, 1)",
       },
       maxWidth: {
         container: "1440px",
@@ -128,8 +133,8 @@ const config: Config = {
         },
       },
       animation: {
-        "fade-up": "fade-up 300ms cubic-bezier(0.2, 0, 0, 1) both",
-        "draw-route": "draw-route 800ms cubic-bezier(0.2, 0, 0, 1) both",
+        "fade-up": "fade-up 250ms cubic-bezier(0.4, 0, 0.2, 1) both",
+        "draw-route": "draw-route 250ms cubic-bezier(0.4, 0, 0.2, 1) both",
       },
     },
   },

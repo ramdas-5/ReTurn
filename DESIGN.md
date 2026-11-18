@@ -1,21 +1,21 @@
-# Web Experiences, Apps & Automation
+# At
 
 ## Mission
-Create implementation-ready, token-driven UI guidance for Web Experiences, Apps & Automation that is optimized for consistency, accessibility, and fast delivery across e-commerce storefront.
+Create implementation-ready, token-driven UI guidance for At that is optimized for consistency, accessibility, and fast delivery across e-commerce storefront.
 
 ## Brand
-- Product/brand: Web Experiences, Apps & Automation
-- URL: https://kigo.studio/
+- Product/brand: At
+- URL: https://traced.life/
 - Audience: online shoppers and consumers
 - Product surface: e-commerce storefront
 
 ## Style Foundations
-- Visual style: clean, functional, implementation-oriented
-- Main font style: `font.family.primary=Poppins`, `font.family.stack=Poppins, Inter, -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif`, `font.size.base=20px`, `font.weight.base=400`, `font.lineHeight.base=20px`
-- Typography scale: `font.size.xs=13px`, `font.size.sm=13.33px`, `font.size.md=14px`, `font.size.lg=15px`, `font.size.xl=17px`, `font.size.2xl=18px`, `font.size.3xl=20px`, `font.size.4xl=22.5px`
-- Color palette: `color.text.primary=#202020`, `color.text.secondary=#242723`, `color.text.tertiary=#4a4144`, `color.text.inverse=#7c1d25`, `color.surface.base=#000000`, `color.surface.muted=#ffffff`
-- Spacing scale: `space.1=5px`, `space.2=6px`, `space.3=12px`, `space.4=14px`, `space.5=16px`, `space.6=17px`, `space.7=18px`, `space.8=20px`
-- Radius/shadow/motion tokens: `motion.duration.instant=300ms`, `motion.duration.fast=500ms`, `motion.duration.normal=800ms`
+- Visual style: structured, tokenized, content-first
+- Main font style: `font.family.primary=Saans`, `font.family.stack=Saans, sans-serif`, `font.size.base=16px`, `font.weight.base=400`, `font.lineHeight.base=24px`
+- Typography scale: `font.size.xs=12px`, `font.size.sm=14px`, `font.size.md=16px`, `font.size.lg=28px`, `font.size.xl=40px`, `font.size.2xl=48px`
+- Color palette: `color.text.primary=#413f32`, `color.text.secondary=#201f1a`, `color.text.tertiary=#fafafa`, `color.text.inverse=#67665f`, `color.surface.base=#000000`, `color.surface.muted=#ffffff`, `color.surface.raised=#615e50`, `color.surface.strong=#f5f5f5`
+- Spacing scale: `space.1=4.03px`, `space.2=5.04px`, `space.3=6.05px`, `space.4=7.06px`, `space.5=8.06px`, `space.6=12.1px`, `space.7=12.6px`, `space.8=16.13px`
+- Radius/shadow/motion tokens: `radius.xs=8px`, `radius.sm=16px`, `radius.md=9999.01px` | `motion.duration.instant=150ms`, `motion.duration.fast=250ms`
 
 ## Accessibility
 - Target: WCAG 2.2 AA
@@ -60,7 +60,7 @@ Concise, confident, implementation-focused.
 - Include keyboard, pointer, and touch behavior.
 - Include spacing and typography token requirements.
 - Include long-content, overflow, and empty-state handling.
-- Include known page component density: cards (108), links (66), lists (19), buttons (13), navigation (5).
+- Include known page component density: links (37), buttons (9), navigation (2), lists (2).
 
 
 ## Quality Gates

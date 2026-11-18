@@ -205,7 +205,7 @@ export default function RouteMap({
           </p>
         </div>
       ) : null}
-      <div className="surface-light absolute bottom-2 left-2 z-[400] rounded bg-surface/95 px-2 py-1 text-2xs font-medium text-ink-2 shadow-sm">
+      <div className="surface-light absolute bottom-2 left-2 z-[400] rounded bg-surface px-2 py-1 text-2xs font-medium text-ink-2 shadow-sm">
         {geometrySource === "osrm" ? "Road route · OSRM" : "Illustrative connectors — estimated, not road navigation"}
       </div>
     </div>
